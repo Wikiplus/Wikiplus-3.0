@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"target": "ES6"
+	},
+	"files": [
+		"typings/jquery/jquery.d.ts",
+		"src/core.js",
+		"src/main.js",
+		"src/moenotice.js"
+	]
+}
