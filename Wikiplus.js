@@ -1,5 +1,5 @@
 /**
- * Wikiplus v3.0.0
+ * Wikiplus-3.0 v0.0.1
  * 2015-12-10
  * 
  * Author:Eridanus Sora
@@ -44,6 +44,8 @@ var Wikiplus = exports.Wikiplus = (function () {
 		key: "start",
 		value: function start() {
 			this.moenotice.create.success("Test Run");
+			var currentSrc = document.currentScript.src;
+			console.log(currentSrc);
 		}
 	}]);
 

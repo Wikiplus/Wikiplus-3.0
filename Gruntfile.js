@@ -14,7 +14,8 @@ module.exports = function (grunt) {
                 files: {
                     'dist/main.js': 'src/main.js',
                     'dist/core.js': 'src/core.js',
-                    'dist/moenotice.js': 'src/moenotice.js'
+                    'dist/moenotice.js': 'src/moenotice.js',
+                    'dist/util.js': 'src/util.js'
                 }
             }
         },

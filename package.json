@@ -1,6 +1,6 @@
 {
-  "name": "Wikiplus-dev",
-  "version": "3.0.0",
+  "name": "Wikiplus-3.0",
+  "version": "0.0.1",
   "homepage": "https://wikiplus-app.smartgslb.com/",
   "description": "A front-end jQuery-based Mediawiki gadget. This is a dev branch for plugin system.",
   "keywords": [

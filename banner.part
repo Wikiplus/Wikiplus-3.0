@@ -1,5 +1,5 @@
 /**
- * Wikiplus v<%= pkg.version %>
+ * Wikiplus-3.0 v<%= pkg.version %>
  * <%= grunt.template.today("yyyy-mm-dd") %>
  * 
  * Author:Eridanus Sora
@@ -12,3 +12,4 @@
  * Licensed by Apache License 2.0
  * http://wikiplus-app.smartgslb.com/
  */
+ 

@@ -12,5 +12,10 @@ export class Wikiplus {
 	}
 	start(){
 		this.moenotice.create.success("Test Run");
+		let currentSrc = document.currentScript.src;
+		console.log(currentSrc);
+	}
+	install(){
+		
 	}
 }
