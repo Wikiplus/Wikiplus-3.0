@@ -1,8 +1,8 @@
 module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
-    
+
     var banner_tmpl = grunt.file.read('./banner.part');
-    
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         babel: {
@@ -12,10 +12,13 @@ module.exports = function (grunt) {
             },
             dist: {
                 files: {
+                    'dist/version.js': 'src/version.js',
                     'dist/main.js': 'src/main.js',
                     'dist/core.js': 'src/core.js',
                     'dist/moenotice.js': 'src/moenotice.js',
-                    'dist/util.js': 'src/util.js'
+                    'dist/util.js': 'src/util.js',
+                    'dist/ui.js': 'src/ui.js',
+                    'dist/i18n.js': 'src/i18n.js'
                 }
             }
         },

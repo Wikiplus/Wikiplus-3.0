@@ -7,6 +7,9 @@
 		"src/core.js",
 		"src/main.js",
 		"src/moenotice.js",
-		"src/util.js"
+		"src/util.js",
+		"src/version.js",
+		"src/ui.js",
+		"src/i18n.js"
 	]
 }
