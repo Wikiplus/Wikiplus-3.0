@@ -2,13 +2,12 @@
  * Wikiplus-3.0 v0.0.1
  * 2015-12-12
  * 
- * Author:Eridanus Sora
- * Github:https://github.com/Last-Order/Wikiplus
+ * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
  * Include MoeNotification
- * https://github.com/Last-Order/MoeNotification
+ * https://github.com/Wikiplus/MoeNotification
  *
- * Copyright by Wikiplus, Eridanus Sora and other contributors
+ * Copyright by Wikiplus, Eridanus Sora, Ted Zyzsdy and other contributors
  * Licensed by Apache License 2.0
  * http://wikiplus-app.smartgslb.com/
  */
@@ -53,14 +52,14 @@ var Wikiplus = exports.Wikiplus = (function () {
 	//Load Moenotice
 
 	_createClass(Wikiplus, [{
-		key: 'setMoenotice',
-		value: function setMoenotice(value) {
-			this.moenotice = value;
+		key: 'setNotice',
+		value: function setNotice(value) {
+			this.notice = value;
 		}
 	}, {
 		key: 'start',
 		value: function start() {
-			this.moenotice.create.success((0, _i18n2.default)("Test Run"));
+			this.notice.create.success((0, _i18n2.default)("Test Run"));
 		}
 	}, {
 		key: 'checkInstall',
@@ -70,8 +69,8 @@ var Wikiplus = exports.Wikiplus = (function () {
 			if (isInstall === "True") {
 				//Updated Case
 				if (_util.Util.getLocalConfig('Version') !== _version.Version.VERSION) {
-					this.moenotice.create.success("Wikiplus-3.0 v" + _version.Version.VERSION);
-					this.moenotice.create.success(_version.Version.releaseNote);
+					this.notice.create.success("Wikiplus-3.0 v" + _version.Version.VERSION);
+					this.notice.create.success(_version.Version.releaseNote);
 					_util.Util.setLocalConfig('Version', _version.Version.VERSION);
 				}
 			} else {
@@ -82,12 +81,13 @@ var Wikiplus = exports.Wikiplus = (function () {
 						_util.Util.setLocalConfig('Version', _version.Version.VERSION);
 						_util.Util.setLocalConfig('StartUseAt', new Date().valueOf());
 						_util.Util.setLocalConfig('StartEditCount', mw.config.values.wgUserEditCount);
-						self.moenotice.create.success((0, _i18n2.default)('Wikiplus installed, enjoy it'));
+						self.notice.create.success((0, _i18n2.default)('Wikiplus installed, enjoy it'));
 					};
 
 					_ui.UI.createDialog({
 						title: (0, _i18n2.default)('Install Wikiplus'),
-						info: (0, _i18n2.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName)
+						info: (0, _i18n2.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
+						mode: [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }]
 					}).then(function (res) {
 						console.log("用户选择：" + (res ? "接受" : "拒绝"));
 						_util.Util.setLocalConfig('SendStatistics', res ? "True" : "False");
@@ -133,7 +133,7 @@ $(function () {
 	var wikiplus = window.Wikiplus = new _core.Wikiplus();
 
 	//依赖注入
-	wikiplus.setMoenotice(moenotice);
+	wikiplus.setNotice(moenotice);
 	//主过程启动
 	console.log('Wikiplus 开始加载');
 	wikiplus.start();
@@ -253,40 +253,81 @@ var UI = exports.UI = (function () {
    * 建立对话框
    * @param {String} option.info 信息
    * @param {String} option.title = "Wikiplus" 标题栏
-   * @param {Object} option.mode 按钮标题和它的返回值，例子如下
-   * mode: {
-   *     "Yes": [true, "Yes"],
-   *     "No": [false, "No"],
-   *     "Key": [return value, "Display String"]
-   * }
+   * @param {Object} option.mode 按钮标题和它的返回值，默认值如下
+   * mode: [
+   *     {id: "Yes", text: _("Yes"), res: true}, 
+   *     {id: "No", text: _("No"), res: false}, 
+   * ]
    */
 		value: function createDialog(option) {
 			var info = option.info || '';
 			var title = option.title || (0, _i18n2.default)('Wikiplus');
-			var mode = option.mode || { "Yes": [true, (0, _i18n2.default)("Yes")], "No": [false, (0, _i18n2.default)("No")] };
+			var mode = option.mode || [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }];
 
 			return new Promise(function (resolve, reject) {
 				var notice = $('<div>').text(info).attr('id', 'Wikiplus-InterBox-Content');
 				var content = $('<div>').append(notice).append($('<hr>'));
-				for (var btnKey in mode) {
-					var dialogBtn = $('<div>').addClass('Wikiplus-InterBox-Btn').attr('id', 'Wikiplus-InterBox-Btn' + btnKey).text(mode[btnKey][1]).data('value', mode[btnKey][0]);
-					content.append(dialogBtn);
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
+
+				try {
+					for (var _iterator = mode[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						var _btnOpt = _step.value;
+
+						var dialogBtn = $('<div>').addClass('Wikiplus-InterBox-Btn').attr('id', 'Wikiplus-InterBox-Btn' + _btnOpt.id).text(_btnOpt.text).data('value', _btnOpt.res);
+						content.append(dialogBtn);
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
 				}
-				createBox({
+
+				UI.createBox({
 					title: title,
 					content: content,
-					width: '600px',
 					callback: function callback() {
-						var _loop = function _loop(btnKey) {
-							$('#Wikiplus-InterBox-Btn' + btnKey).click(function () {
-								var resValue = $('#Wikiplus-InterBox-Btn' + btnKey).data('value');
-								UI.closeAllBox();
-								resolve(resValue);
-							});
-						};
+						var _iteratorNormalCompletion2 = true;
+						var _didIteratorError2 = false;
+						var _iteratorError2 = undefined;
 
-						for (var btnKey in mode) {
-							_loop(btnKey);
+						try {
+							var _loop = function _loop() {
+								var btnOpt = _step2.value;
+
+								$('#Wikiplus-InterBox-Btn' + btnOpt.id).click(function () {
+									var resValue = $('#Wikiplus-InterBox-Btn' + btnOpt.id).data('value');
+									UI.closeBox();
+									resolve(resValue);
+								});
+							};
+
+							for (var _iterator2 = mode[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+								_loop();
+							}
+						} catch (err) {
+							_didIteratorError2 = true;
+							_iteratorError2 = err;
+						} finally {
+							try {
+								if (!_iteratorNormalCompletion2 && _iterator2.return) {
+									_iterator2.return();
+								}
+							} finally {
+								if (_didIteratorError2) {
+									throw _iteratorError2;
+								}
+							}
 						}
 					}
 				});
@@ -294,82 +335,84 @@ var UI = exports.UI = (function () {
 		}
 
 		/**
-   * 关闭所有Wikiplus弹出框
+   * 关闭Wikiplus弹出框
    */
 
 	}, {
-		key: 'closeAllBox',
-		value: function closeAllBox() {
+		key: 'closeBox',
+		value: function closeBox() {
 			$('.Wikiplus-InterBox').fadeOut('fast', function () {
 				$(this).remove();
 			});
+		}
+
+		/**
+   * 画框
+   * @param {String} option.title 标题
+   * @param {HTML} option.content 内容
+   * @param {Integer} option.width = 600 宽度，单位为px
+   * @param {function()} option.callback 回调函数
+   */
+
+	}, {
+		key: 'createBox',
+		value: function createBox(option) {
+			var title = option.title || (0, _i18n2.default)("Wikiplus");
+			var content = option.content || "";
+			var width = option.width || 600;
+			var callback = option.callback || new Function();
+
+			//检查是否已存在
+			if ($('.Wikiplus-InterBox').length > 0) {
+				$('.Wikiplus-InterBox').each(function () {
+					$(this).remove();
+				});
+			}
+
+			var clientWidth = document.body.clientWidth;
+			var clientHeight = document.body.clientHeight;
+			var diglogBox = $('<div>').addClass('Wikiplus-InterBox').css({
+				'margin-left': clientWidth / 2 - width / 2 + 'px',
+				'top': $(document).scrollTop() + clientHeight * 0.2,
+				'display': 'none'
+			}).append($('<div>').addClass('Wikiplus-InterBox-Header').html(title)).append($('<div>').addClass('Wikiplus-InterBox-Content').append(content)).append($('<span>').text('×').addClass('Wikiplus-InterBox-Close'));
+			$('body').append(diglogBox);
+			$('.Wikiplus-InterBox').width(width + 'px');
+			$('.Wikiplus-InterBox-Close').click(function () {
+				$(this).parent().fadeOut('fast', function () {
+					window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
+					$(this).remove();
+				});
+			});
+			//拖曳
+			var bindDragging = function bindDragging(element) {
+				element.mousedown(function (e) {
+					var baseX = e.clientX;
+					var baseY = e.clientY;
+					var baseOffsetX = element.parent().offset().left;
+					var baseOffsetY = element.parent().offset().top;
+					$(document).mousemove(function (e) {
+						element.parent().css({
+							'margin-left': baseOffsetX + e.clientX - baseX,
+							'top': baseOffsetY + e.clientY - baseY
+						});
+					});
+					$(document).mouseup(function () {
+						element.unbind('mousedown');
+						$(document).unbind('mousemove');
+						$(document).unbind('mouseup');
+						bindDragging(element);
+					});
+				});
+			};
+			bindDragging($('.Wikiplus-InterBox-Header'));
+			$('.Wikiplus-InterBox').fadeIn(500);
+			callback();
 		}
 	}]);
 
 	return UI;
 })();
-
-/**
- * 画框
- * @param {String} option.title 标题
- * @param {HTML} option.content 内容
- * @param {String} option.width = 600px 宽度
- * @param {function()} option.callback 回调函数
- */
-
-function createBox(option) {
-	var title = option.title || (0, _i18n2.default)("Wikiplus");
-	var content = option.content || "";
-	var width = option.title || "600px";
-	var callback = option.callback || new Function();
-
-	//检查是否已存在
-	if ($('.Wikiplus-InterBox').length > 0) {
-		$('.Wikiplus-InterBox').each(function () {
-			$(this).remove();
-		});
-	}
-
-	var clientWidth = document.body.clientWidth;
-	var clientHeight = document.body.clientHeight;
-	var diglogBox = $('<div>').addClass('Wikiplus-InterBox').css({
-		'margin-left': clientWidth / 2 - width / 2,
-		'top': $(document).scrollTop() + clientHeight * 0.2,
-		'display': 'none'
-	}).append($('<div>').addClass('Wikiplus-InterBox-Header').html(title)).append($('<div>').addClass('Wikiplus-InterBox-Content').append(content)).append($('<span>').text('×').addClass('Wikiplus-InterBox-Close'));
-	$('body').append(diglogBox);
-	$('.Wikiplus-InterBox').width(width);
-	$('.Wikiplus-InterBox-Close').click(function () {
-		$(this).parent().fadeOut('fast', function () {
-			window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
-			$(this).remove();
-		});
-	});
-	//拖曳
-	var bindDragging = function bindDragging(element) {
-		element.mousedown(function (e) {
-			var baseX = e.clientX;
-			var baseY = e.clientY;
-			var baseOffsetX = element.parent().offset().left;
-			var baseOffsetY = element.parent().offset().top;
-			$(document).mousemove(function (e) {
-				element.parent().css({
-					'margin-left': baseOffsetX + e.clientX - baseX,
-					'top': baseOffsetY + e.clientY - baseY
-				});
-			});
-			$(document).mouseup(function () {
-				element.unbind('mousedown');
-				$(document).unbind('mousemove');
-				$(document).unbind('mouseup');
-				bindDragging(element);
-			});
-		});
-	};
-	bindDragging($('.Wikiplus-InterBox-Header'));
-	$('.Wikiplus-InterBox').fadeIn(500);
-	callback();
-}
 
 },{"./i18n":2}],6:[function(require,module,exports){
 "use strict";
@@ -407,7 +450,8 @@ var Util = exports.Util = (function () {
 
 	}, {
 		key: "setLocalConfig",
-		value: function setLocalConfig(key, value) {
+		value: function setLocalConfig(key) {
+			var value = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
 			var isObj = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
 			key = "Wikiplus-" + key;

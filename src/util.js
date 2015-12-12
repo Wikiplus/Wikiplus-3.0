@@ -12,7 +12,7 @@ export class Util {
 		});
 	}
 	//save local config
-	static setLocalConfig(key, value, isObj = false){
+	static setLocalConfig(key, value = "", isObj = false){
 		key = "Wikiplus-" + key;
 		if(isObj){
 			localStorage[key] = JSON.stringify(value);

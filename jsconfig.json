@@ -4,6 +4,7 @@
 	},
 	"files": [
 		"typings/jquery/jquery.d.ts",
+		"typings/wikiplus/ui.d.ts",
 		"src/core.js",
 		"src/main.js",
 		"src/moenotice.js",

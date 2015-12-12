@@ -9,7 +9,7 @@ $(function(){
 	let wikiplus = window.Wikiplus = new Wikiplus();
 	
 	//依赖注入
-	wikiplus.setMoenotice(moenotice);
+	wikiplus.setNotice(moenotice);
 	//主过程启动
 	console.log('Wikiplus 开始加载');
 	wikiplus.start();

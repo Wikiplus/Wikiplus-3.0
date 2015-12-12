@@ -15,11 +15,11 @@ export class Wikiplus {
 		this.checkInstall();
 	}
 	//Load Moenotice
-	setMoenotice(value) {
-		this.moenotice = value;
+	setNotice(value) {
+		this.notice = value;
 	}
 	start() {
-		this.moenotice.create.success(_("Test Run"));
+		this.notice.create.success(_("Test Run"));
 	}
 	checkInstall() {
 		let self = this;
@@ -27,8 +27,8 @@ export class Wikiplus {
 		if (isInstall === "True") {
 			//Updated Case
 			if (Util.getLocalConfig('Version') !== Version.VERSION) {
-				this.moenotice.create.success("Wikiplus-3.0 v" + Version.VERSION);
-				this.moenotice.create.success(Version.releaseNote);
+				this.notice.create.success("Wikiplus-3.0 v" + Version.VERSION);
+				this.notice.create.success(Version.releaseNote);
 				Util.setLocalConfig('Version', Version.VERSION);
 			}
 		} else {
@@ -38,12 +38,16 @@ export class Wikiplus {
 				Util.setLocalConfig('Version', Version.VERSION);
 				Util.setLocalConfig('StartUseAt', new Date().valueOf());
 				Util.setLocalConfig('StartEditCount', mw.config.values.wgUserEditCount);
-				self.moenotice.create.success(_('Wikiplus installed, enjoy it'));
+				self.notice.create.success(_('Wikiplus installed, enjoy it'));
 			};
 
 			UI.createDialog({
 				title: _('Install Wikiplus'),
-				info: _('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName)
+				info: _('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
+				mode: [
+					{ id: "Yes", text: _("Yes"), res: true },
+					{ id: "No", text: _("No"), res: false }
+				]
 			}).then(res => {
 				console.log("用户选择：" + (res ? "接受" : "拒绝"));
 				Util.setLocalConfig('SendStatistics', res ? "True" : "False");

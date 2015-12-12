@@ -2,13 +2,12 @@
  * Wikiplus-3.0 v<%= pkg.version %>
  * <%= grunt.template.today("yyyy-mm-dd") %>
  * 
- * Author:Eridanus Sora
- * Github:https://github.com/Last-Order/Wikiplus
+ * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
  * Include MoeNotification
- * https://github.com/Last-Order/MoeNotification
+ * https://github.com/Wikiplus/MoeNotification
  *
- * Copyright by Wikiplus, Eridanus Sora and other contributors
+ * Copyright by Wikiplus, Eridanus Sora, Ted Zyzsdy and other contributors
  * Licensed by Apache License 2.0
  * http://wikiplus-app.smartgslb.com/
  */
