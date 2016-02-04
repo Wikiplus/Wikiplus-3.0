@@ -3,32 +3,26 @@
  */
 export function MoeNotification() {
     var self = this;
-    this.display = function (text, type, callback) {
-        var _callback = callback || function () { };
-        var _text = text || '喵~';
-        var _type = type || 'success';
+    this.display = function (text = '喵', type = 'success', callback = () => { }) {
         $("#MoeNotification").append(
             $("<div>").addClass('MoeNotification-notice')
-                .addClass('MoeNotification-notice-' + _type)
-                .append('<span>' + _text + '</span>')
+                .addClass('MoeNotification-notice-' + type)
+                .append('<span>' + text + '</span>')
                 .fadeIn(300)
             );
         self.bind();
         self.clear();
-        _callback($("#MoeNotification").find('.MoeNotification-notice').last());
+        callback($("#MoeNotification").find('.MoeNotification-notice').last());
     }
     this.create = {
-        success: function (text, callback) {
-            var _callback = callback || function () { };
-            self.display(text, 'success', _callback);
+        success: function (text, callback = () => { }) {
+            self.display(text, 'success', callback);
         },
-        warning: function (text, callback) {
-            var _callback = callback || function () { };
-            self.display(text, 'warning', _callback);
+        warning: function (text, callback = () => { }) {
+            self.display(text, 'warning', callback);
         },
-        error: function (text, callback) {
-            var _callback = callback || function () { };
-            self.display(text, 'error', _callback);
+        error: function (text, callback = () => { }) {
+            self.display(text, 'error', callback);
         }
     };
     this.clear = function () {
