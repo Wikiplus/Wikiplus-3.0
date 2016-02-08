@@ -6,19 +6,22 @@ import _ from './i18n'
 import { Version } from './version'
 import { Util } from './util'
 import { UI } from './ui'
+import { ModuleManager } from './moduleManager'
 
 export class Wikiplus {
 	//初始化
-	constructor() {
+	constructor(notice) {
+        this.UI = UI;
+        this.Util = Util;
+        this.Version = Version;
+        this.notice = notice;
+        
 		console.log(`Wikiplus-3.0 v${Version.VERSION}`);
 		Util.loadCss(Version.scriptURL + "/Wikiplus.css");
 		this.checkInstall();
 	}
-	//Load Moenotice
-	setNotice(value) {
-		this.notice = value;
-	}
 	start() {
+        this.mmr = new ModuleManager();
 		this.notice.create.success(_("Test Run"));
 	}
 	checkInstall() {

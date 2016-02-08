@@ -20,6 +20,7 @@ module.exports = function (grunt) {
                     'dist/ui.js': 'src/ui.js',
                     'dist/i18n.js': 'src/i18n.js',
                     'dist/api.js': 'src/api.js',
+                    'dist/moduleManager.js': 'src/moduleManager.js'
                 }
             }
         },

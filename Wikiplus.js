@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.1
- * 2015-12-12
+ * 2016-02-09
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -35,6 +35,8 @@ var _util = require('./util');
 
 var _ui = require('./ui');
 
+var _moduleManager = require('./moduleManager');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -42,23 +44,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var Wikiplus = exports.Wikiplus = (function () {
 	//初始化
 
-	function Wikiplus() {
+	function Wikiplus(notice) {
 		_classCallCheck(this, Wikiplus);
+
+		this.UI = _ui.UI;
+		this.Util = _util.Util;
+		this.Version = _version.Version;
+		this.notice = notice;
 
 		console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
 		_util.Util.loadCss(_version.Version.scriptURL + "/Wikiplus.css");
 		this.checkInstall();
 	}
-	//Load Moenotice
 
 	_createClass(Wikiplus, [{
-		key: 'setNotice',
-		value: function setNotice(value) {
-			this.notice = value;
-		}
-	}, {
 		key: 'start',
 		value: function start() {
+			this.mmr = new _moduleManager.ModuleManager();
 			this.notice.create.success((0, _i18n2.default)("Test Run"));
 		}
 	}, {
@@ -101,7 +103,7 @@ var Wikiplus = exports.Wikiplus = (function () {
 	return Wikiplus;
 })();
 
-},{"./i18n":2,"./ui":5,"./util":6,"./version":7}],2:[function(require,module,exports){
+},{"./i18n":2,"./moduleManager":4,"./ui":6,"./util":7,"./version":8}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -130,16 +132,134 @@ var _moenotice = require('./moenotice');
 
 $(function () {
 	var moenotice = new _moenotice.MoeNotification();
-	var wikiplus = window.Wikiplus = new _core.Wikiplus();
+	var wikiplus = window.Wikiplus = new _core.Wikiplus(moenotice);
 
-	//依赖注入
-	wikiplus.setNotice(moenotice);
 	//主过程启动
 	console.log('Wikiplus 开始加载');
 	wikiplus.start();
 });
 
-},{"./core":1,"./moenotice":4}],4:[function(require,module,exports){
+},{"./core":1,"./moenotice":5}],4:[function(require,module,exports){
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikiplus-mmr
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.ModuleManager = undefined;
+
+var _version = require('./version');
+
+var _util = require('./util');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ModuleManager = exports.ModuleManager = (function () {
+    function ModuleManager() {
+        _classCallCheck(this, ModuleManager);
+
+        //Load Config
+        this.modulesConfig = _util.Util.getLocalConfig('modules', true);
+        if (this.modulesConfig == undefined) {
+            this.modulesConfig = [];
+        }
+        this.modules = {};
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+            for (var _iterator = this.modulesConfig[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var moduleName = _step.value;
+
+                this.loadModule(moduleName);
+            }
+        } catch (err) {
+            _didIteratorError = true;
+            _iteratorError = err;
+        } finally {
+            try {
+                if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                }
+            } finally {
+                if (_didIteratorError) {
+                    throw _iteratorError;
+                }
+            }
+        }
+    }
+
+    _createClass(ModuleManager, [{
+        key: 'loadModule',
+        value: function loadModule(moduleName) {
+            var callbackName = "_wikiplus_mmr_cb" + new Date().getTime();
+            //主加载过程
+            var self = this;
+
+            //设置回调
+            window[callbackName] = function (newModule) {
+                self.loadModuleHelper(newModule, moduleName, self);
+                delete window[callbackName];
+            };
+
+            //载入代码
+            var jsurl = _version.Version.scriptURL + "/backend/getmodule?name=" + moduleName + "&callback=" + callbackName;
+            _util.Util.loadJs(jsurl);
+        }
+    }, {
+        key: 'loadModuleHelper',
+        value: function loadModuleHelper(newModule, moduleName, self) {
+            var modules = self.modules;
+
+            console.log("尝试读取模块 " + moduleName + " 基本信息。");
+            if (newModule.manifest == undefined) {
+                console.error("无法解析模块。");
+            } else if (newModule.manifest.name == moduleName) {
+                console.log("加载 " + newModule.manifest.name + " 版本 " + newModule.manifest.version + "成功。");
+                modules[moduleName] = newModule;
+                console.log("正在分析所用依赖。");
+                var _iteratorNormalCompletion2 = true;
+                var _didIteratorError2 = false;
+                var _iteratorError2 = undefined;
+
+                try {
+                    for (var _iterator2 = newModule.manifest.dependencies[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                        var dependencyName = _step2.value;
+
+                        if (self.modulesConfig.indexOf(dependencyName) == -1) {
+                            self.modulesConfig.push(dependencyName);
+                            console.log("加载额外依赖：" + dependencyName);
+                            self.loadModule(dependencyName);
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError2 = true;
+                    _iteratorError2 = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                            _iterator2.return();
+                        }
+                    } finally {
+                        if (_didIteratorError2) {
+                            throw _iteratorError2;
+                        }
+                    }
+                }
+            } else {
+                console.error("载入模块失败：" + newModule.manifest.info);
+            }
+        }
+    }]);
+
+    return ModuleManager;
+})();
+
+},{"./util":7,"./version":8}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -151,27 +271,31 @@ exports.MoeNotification = MoeNotification;
  */
 function MoeNotification() {
     var self = this;
-    this.display = function (text, type, callback) {
-        var _callback = callback || function () {};
-        var _text = text || '喵~';
-        var _type = type || 'success';
-        $("#MoeNotification").append($("<div>").addClass('MoeNotification-notice').addClass('MoeNotification-notice-' + _type).append('<span>' + _text + '</span>').fadeIn(300));
+    this.display = function () {
+        var text = arguments.length <= 0 || arguments[0] === undefined ? '喵' : arguments[0];
+        var type = arguments.length <= 1 || arguments[1] === undefined ? 'success' : arguments[1];
+        var callback = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
+
+        $("#MoeNotification").append($("<div>").addClass('MoeNotification-notice').addClass('MoeNotification-notice-' + type).append('<span>' + text + '</span>').fadeIn(300));
         self.bind();
         self.clear();
-        _callback($("#MoeNotification").find('.MoeNotification-notice').last());
+        callback($("#MoeNotification").find('.MoeNotification-notice').last());
     };
     this.create = {
-        success: function success(text, callback) {
-            var _callback = callback || function () {};
-            self.display(text, 'success', _callback);
+        success: function success(text) {
+            var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
+
+            self.display(text, 'success', callback);
         },
-        warning: function warning(text, callback) {
-            var _callback = callback || function () {};
-            self.display(text, 'warning', _callback);
+        warning: function warning(text) {
+            var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
+
+            self.display(text, 'warning', callback);
         },
-        error: function error(text, callback) {
-            var _callback = callback || function () {};
-            self.display(text, 'error', _callback);
+        error: function error(text) {
+            var callback = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
+
+            self.display(text, 'error', callback);
         }
     };
     this.clear = function () {
@@ -221,7 +345,7 @@ function MoeNotification() {
     }
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
@@ -414,7 +538,7 @@ var UI = exports.UI = (function () {
 	return UI;
 })();
 
-},{"./i18n":2}],6:[function(require,module,exports){
+},{"./i18n":2}],7:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -439,12 +563,26 @@ var Util = exports.Util = (function () {
 
 		//Load css (jQuery required)
 		value: function loadCss(path) {
-			$("head").append("<link>");
-			$("head").children(":last").attr({
+			var cssNode = document.createElement('link');
+			$(cssNode).attr({
 				rel: "stylesheet",
 				type: "text/css",
 				href: path
 			});
+			$("head").append(cssNode);
+		}
+		//Load js (jQuery required)
+
+	}, {
+		key: "loadJs",
+		value: function loadJs(path) {
+			var jsnode = document.createElement('script');
+			$(jsnode).attr({
+				type: 'text/javascript',
+				async: false,
+				src: path
+			});
+			$("head").append(jsnode);
 		}
 		//save local config
 
@@ -480,7 +618,7 @@ var Util = exports.Util = (function () {
 	return Util;
 })();
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -498,8 +636,8 @@ var Version = exports.Version = function Version() {
 };
 
 ;
-Version.VERSION = "0.0.1";
-Version.releaseNote = "正在构建Wikiplus-3.0";
+Version.VERSION = "0.0.3";
+Version.releaseNote = "正在构建Wikiplus-3.0 mmr";
 Version.scriptURL = "https://127.0.0.1";
 
 },{}]},{},[3]);

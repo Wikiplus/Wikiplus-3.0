@@ -4,13 +4,24 @@
 export class Util {
 	//Load css (jQuery required)
 	static loadCss(path) {
-		$("head").append("<link>");
-		$("head").children(":last").attr({
+        var cssNode = document.createElement('link');
+        $(cssNode).attr({
 			rel: "stylesheet",
 			type: "text/css",
 			href: path
-		});
+		})
+		$("head").append(cssNode);
 	}
+    //Load js (jQuery required)
+    static loadJs(path) {
+        var jsnode = document.createElement('script');
+        $(jsnode).attr({
+            type: 'text/javascript',
+            async: false,
+            src: path
+        })
+        $("head").append(jsnode);
+    }
 	//save local config
 	static setLocalConfig(key, value = "", isObj = false){
 		key = "Wikiplus-" + key;
