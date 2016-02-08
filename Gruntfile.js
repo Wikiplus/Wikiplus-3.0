@@ -18,7 +18,8 @@ module.exports = function (grunt) {
                     'dist/moenotice.js': 'src/moenotice.js',
                     'dist/util.js': 'src/util.js',
                     'dist/ui.js': 'src/ui.js',
-                    'dist/i18n.js': 'src/i18n.js'
+                    'dist/i18n.js': 'src/i18n.js',
+                    'dist/api.js': 'src/api.js',
                 }
             }
         },
