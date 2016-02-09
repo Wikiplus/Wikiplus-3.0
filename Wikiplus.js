@@ -111,10 +111,12 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = i18n;
 /**
- * i18n for Wikiplus
+ * i18n for Wikiplus-3.0
  */
 function i18n() {
   var value = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+  var scope = arguments.length <= 1 || arguments[1] === undefined ? "default" : arguments[1];
+  var language = arguments.length <= 2 || arguments[2] === undefined ? "default" : arguments[2];
 
   return value;
 }
@@ -215,13 +217,11 @@ var ModuleManager = exports.ModuleManager = (function () {
         value: function loadModuleHelper(newModule, moduleName, self) {
             var modules = self.modules;
 
-            console.log("尝试读取模块 " + moduleName + " 基本信息。");
             if (newModule.manifest == undefined) {
-                console.error("无法解析模块。");
+                console.error("无法解析模块 " + moduleName);
             } else if (newModule.manifest.name == moduleName) {
-                console.log("加载 " + newModule.manifest.name + " 版本 " + newModule.manifest.version + "成功。");
+                console.log("加载 " + newModule.manifest.name + " 版本 " + newModule.manifest.version + " 成功。");
                 modules[moduleName] = newModule;
-                console.log("正在分析所用依赖。");
                 var _iteratorNormalCompletion2 = true;
                 var _didIteratorError2 = false;
                 var _iteratorError2 = undefined;
@@ -232,7 +232,7 @@ var ModuleManager = exports.ModuleManager = (function () {
 
                         if (self.modulesConfig.indexOf(dependencyName) == -1) {
                             self.modulesConfig.push(dependencyName);
-                            console.log("加载额外依赖：" + dependencyName);
+                            console.log('准备加载' + moduleName + '的额外依赖: ' + dependencyName);
                             self.loadModule(dependencyName);
                         }
                     }
@@ -250,8 +250,67 @@ var ModuleManager = exports.ModuleManager = (function () {
                         }
                     }
                 }
+
+                this.modulesInit();
             } else {
-                console.error("载入模块失败：" + newModule.manifest.info);
+                console.error("载入模块失败：" + moduleName);
+            }
+        }
+    }, {
+        key: 'modulesInit',
+        value: function modulesInit() {
+            for (var moduleName in this.modules) {
+                var module = this.modules[moduleName];
+
+                if (module['__wikiplus_mmr_init_status'] == 'loaded' || module['__wikiplus_mmr_init_status'] == 'skipped') {
+                    continue;
+                }
+
+                console.log("初始化模块: " + moduleName);
+                //检查依赖
+                var dpdOk = true;
+                var dpds = {};
+                var _iteratorNormalCompletion3 = true;
+                var _didIteratorError3 = false;
+                var _iteratorError3 = undefined;
+
+                try {
+                    for (var _iterator3 = module.manifest.dependencies[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                        var dpdName = _step3.value;
+
+                        if (this.modules[dpdName] == undefined) {
+                            dpdOk = false;
+                            break;
+                        } else {
+                            dpds[dpdName] = this.modules[dpdName];
+                        }
+                    }
+                } catch (err) {
+                    _didIteratorError3 = true;
+                    _iteratorError3 = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                            _iterator3.return();
+                        }
+                    } finally {
+                        if (_didIteratorError3) {
+                            throw _iteratorError3;
+                        }
+                    }
+                }
+
+                if (dpdOk) {
+                    if (module.init(module, dpds)) {
+                        console.log('模块' + moduleName + '初始化成功。');
+                        module['__wikiplus_mmr_init_status'] = 'loaded';
+                    } else {
+                        console.log('模块' + moduleName + '认为它自己不应该被初始化。');
+                        module['__wikiplus_mmr_init_status'] = 'skipped';
+                    }
+                } else {
+                    console.log('模块' + moduleName + '依赖不满足，等待下次再初始化。');
+                }
             }
         }
     }]);
@@ -636,8 +695,8 @@ var Version = exports.Version = function Version() {
 };
 
 ;
-Version.VERSION = "0.0.3";
-Version.releaseNote = "正在构建Wikiplus-3.0 mmr";
+Version.VERSION = "0.0.4";
+Version.releaseNote = "mmr这就差不多了吧。";
 Version.scriptURL = "https://127.0.0.1";
 
 },{}]},{},[3]);

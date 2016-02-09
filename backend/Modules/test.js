@@ -2,9 +2,10 @@
     "manifest": {
         "name": "test",
         "version": "0.0.2",
-        "dependencies": []
+        "dependencies": ['sora', 'diu']
     },
-    "init": function(){
-        console.log("Hello, world.");
+    "init": function(self, dpds){
+        console.log("Hello! I'm test.");
+        return true;
     }
 })
