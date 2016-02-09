@@ -335,7 +335,7 @@ function MoeNotification() {
         var type = arguments.length <= 1 || arguments[1] === undefined ? 'success' : arguments[1];
         var callback = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
 
-        $("#MoeNotification").append($("<div>").addClass('MoeNotification-notice').addClass('MoeNotification-notice-' + type).append('<span>' + text + '</span>').fadeIn(300));
+        $("#MoeNotification").append($("<div>").addClass('MoeNotification-notice').addClass('MoeNotification-notice-' + type).append($('<span>').text(text)).fadeIn(300));
         self.bind();
         self.clear();
         callback($("#MoeNotification").find('.MoeNotification-notice').last());
@@ -397,7 +397,7 @@ function MoeNotification() {
         });
     };
     this.init = function () {
-        $("body").append('<div id="MoeNotification"></div>');
+        $("body").append($('<div>').attr('id', 'MoeNotification'));
     };
     if (!($("#MoeNotification").length > 0)) {
         this.init();
