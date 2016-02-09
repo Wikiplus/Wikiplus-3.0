@@ -1,18 +1,238 @@
 /**
  * Mediawiki API Wrapper
  */
-export class API{
+import _ from './i18n'
+import { Version } from './version'
+
+export class API {
+    /**
+     * 返回API地址
+     * @return {stirng} API API地址
+     */
+    static getAPIURL() {
+        return `${Version.scriptURL}${window.mw.config.values.wgScriptPath}/api.php`;
+    }
 	/**
 	 * 返回当前页页面名。
+     * @return {string} pageName 页面标题
 	 */
-	static getThisPageName(){
-		return new Promise((resolve, reject) => {
-			let pageName = window.mw.config.values.wgPageName;
-			if(pageName == undefined){
-				reject(new Error('Can not read this page title.'));
-			}else{
-				resolve(pageName);
-			}
-		});
-	}
+    static getThisPageName() {
+        let pageName = window.mw.config.values.wgPageName;
+        if (pageName === undefined) {
+            throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
+        }
+        else {
+            return pageName;
+        }
+    }
+    /**
+     * 返回编辑令牌
+     * @return Promise
+     */
+    static getEditToken(title) {
+        return new Promise((resolve, reject) => {
+            if (window.mw.user.tokens.get('editToken') && window.mw.user.tokens.get('editToken') !== '+\\') {
+                resolve(window.mw.user.tokens.get('editToken'));
+            }
+            else {
+                // 前端拿不到edittoken 通过API取
+                $.ajax({
+                    url: self.API,
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        'action': 'query',
+                        'meta': 'tokens',
+                        'format': 'json'
+                    },
+                    success: (data) => {
+                        if (data.query && data.query.tokens && data.query.tokens.csrftoken && data.query.tokens.csrftoken !== '+\\') {
+                            resolve(data.query.tokens.csrftoken);
+                        }
+                        else {
+                            reject(new Error('Fail to get the EditToken'));
+                        }
+                    },
+                    error: (e) => {
+                        reject(new Error('Fail to get the EditToken'));
+                    }
+                })
+            }
+        })
+    }
+    /**
+     * 获取编辑起始时间戳
+     * @param {string} title 页面标题
+     * @return Promise
+     */
+    static getTimeStamp(title) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: this.getAPIURL(),
+                type: "GET",
+                dataType: "json",
+                data: {
+                    'action': 'query',
+                    'prop': 'revisions|info',
+                    'titles': title,
+                    'rvprop': 'timestamp',
+                    'format': 'json'
+                },
+                beforeSend: function () {
+                    console.time('获得页面基础信息时间耗时');
+                },
+                success: (data) => {
+                    if (data && data.query && data.query.pages) {
+                        let info = data.query.pages;
+                        for (var key in info) {
+                            if (key !== '-1') {
+                                if (info[key].revisions && info[key].revisions.length > 0) {
+                                    resolve(info[key].revisions[0].timestamp);
+                                    console.timeEnd('获得页面基础信息时间耗时');
+                                }
+                                else {
+                                    reject(new Error('Fail to get the timestamp of this page.'));
+                                }
+                            }
+                            else {
+                                if (window.mw.config.values.wgArticleId === 0) {
+                                    reject(new Error("Can't get timestamps of empty pages."));
+                                }
+                            }
+                        }
+                    }
+                },
+                error: (e) => {
+                    reject(new Error(`Fail to get the timestamp of this page.`));
+                }
+            })
+        })
+    }
+    /**
+     * 页面编辑
+     * @param {object} config
+     */
+    static edit(config) {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: this.getAPIURL(),
+                data: $.extend({
+                    'action': 'edit',
+                    'format': 'json',
+                    'text': config.content,
+                    'title': config.title,
+                    'token': config.editToken,
+                    'basetimestamp': config.timeStamp,
+                    'summary': config.summary
+                }, config.addtionalConfig || {}),
+                success: (data) => {
+                    if (data && data.edit) {
+                        if (data.edit.result && data.edit.result == 'Success') {
+                            resolve();
+                        }
+                        else {
+                            if (data.edit.code) {
+                                //防滥用过滤器
+                                reject(new Error('hit_abusefilter', `${_('hit_abusefilter') }:${data.edit.info.replace('/Hit AbuseFilter: /ig', '') }<br><small>${data.edit.warning}</small>`));
+                            }
+                            else {
+                                reject(new Error('unknown_edit_error'));
+                            }
+                        }
+                    }
+                    // 一会儿再回来处理这里的错误。
+                    else if (data && data.error && data.error.code) {
+                    }
+                    else if (data.code) {
+                    }
+                    else {
+                    }
+                },
+                error: (e) => {
+                    reject(new Error('Fail to edit this page due to network reasons.'))
+                }
+            })
+        })
+    }
+    /**
+     * 编辑段落
+     * @param {object} config 
+     */
+    static editSection(config) {
+        return this.edit({
+            "title": config.title,
+            "content": config.content,
+            "editToken": config.editToken,
+            "timeStamp": config.timeStamp,
+            "summary": config.summary,
+            "addtionalConfig": {
+                "section": config.section
+            }
+        });
+    }
+    /**
+     * 获取页面WikiText
+     * @param {string} title 页面名
+     * @param {stirng} section 段落编号(可选)
+     * @param {string} revision 修订版本号(可选)
+     * @return Promise
+     */
+    static getWikiText(title, section = '', revision = '') {
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: location.protocol + '//' + location.host + window.mw.config.values.wgScriptPath + '/index.php',
+                type: "GET",
+                dataType: "text",
+                cache: false,
+                data: {
+                    'title': title,
+                    'action': 'raw'
+                },
+                beforeSend: function () {
+                    console.time('获得页面文本耗时');
+                },
+                success: (data) => {
+                    resolve(data);
+                    console.timeEnd('获得页面文本耗时');
+                },
+                error: (e) => {
+                    reject(new Error('Fail to get the WikiText of this page.'));
+                }
+            })
+        })
+    }
+    
+    /**
+     * 解析WikiText
+     * @param {string} wikitext
+     */
+    static parseWikiText(wikitext = ''){
+        return new Promise((resolve,reject)=>{
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    'format': 'json',
+                    'action': 'parse',
+                    'text': wikitext,
+                    'title': this.getThisPageName(),
+                    'pst': 'true'
+                },
+                url: this.getAPIURL(),
+                success : (data)=>{
+                    if (data && data.parse && data.parse.text) {
+                        resolve(data.parse.text['*']);
+                    }
+                    else{
+                        reject(new Error('Fail to parse WikiText.'));
+                    }
+                },
+                error:(e)=>{
+                    reject(new Error('Fail to parse WikiText due to network reasons.'));
+                }
+            })
+        })
+    }
 }
