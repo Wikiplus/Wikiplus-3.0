@@ -7,7 +7,9 @@ export function MoeNotification() {
         $("#MoeNotification").append(
             $("<div>").addClass('MoeNotification-notice')
                 .addClass('MoeNotification-notice-' + type)
-                .append('<span>' + text + '</span>')
+                .append(
+                    $('<span>').text(text)
+                )
                 .fadeIn(300)
             );
         self.bind();
@@ -68,7 +70,9 @@ export function MoeNotification() {
             });
     }
     this.init = function () {
-        $("body").append('<div id="MoeNotification"></div>');
+        $("body").append(
+            $('<div>').attr('id','MoeNotification')
+        );
     }
     if (!($("#MoeNotification").length > 0)) {
         this.init();
