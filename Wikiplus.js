@@ -1,5 +1,5 @@
 /**
- * Wikiplus-3.0 v0.0.1
+ * Wikiplus-3.0 v0.0.3
  * 2016-02-09
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
@@ -15,7 +15,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* global mw */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /* global mw */
 /**
  * Wikiplus Core
  */
@@ -41,7 +41,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Wikiplus = exports.Wikiplus = function () {
+var Wikiplus = exports.Wikiplus = (function () {
 	//初始化
 
 	function Wikiplus(notice) {
@@ -53,6 +53,7 @@ var Wikiplus = exports.Wikiplus = function () {
 		this.notice = notice;
 
 		console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
+		_util.Util.scopeConfigInit();
 		_util.Util.loadCss(_version.Version.scriptURL + "/Wikiplus.css");
 		this.checkInstall();
 	}
@@ -101,7 +102,7 @@ var Wikiplus = exports.Wikiplus = function () {
 	}]);
 
 	return Wikiplus;
-}();
+})();
 
 },{"./i18n":2,"./moduleManager":4,"./ui":6,"./util":7,"./version":8}],2:[function(require,module,exports){
 "use strict";
@@ -116,7 +117,6 @@ exports.default = i18n;
 function i18n() {
   var value = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
   var scope = arguments.length <= 1 || arguments[1] === undefined ? "default" : arguments[1];
-  var language = arguments.length <= 2 || arguments[2] === undefined ? "default" : arguments[2];
 
   return value;
 }
@@ -144,9 +144,9 @@ $(function () {
 },{"./core":1,"./moenotice":5}],4:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikiplus-mmr
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikiplus-mmr
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -159,7 +159,7 @@ var _util = require('./util');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ModuleManager = exports.ModuleManager = function () {
+var ModuleManager = exports.ModuleManager = (function () {
     function ModuleManager() {
         _classCallCheck(this, ModuleManager);
 
@@ -316,7 +316,7 @@ var ModuleManager = exports.ModuleManager = function () {
     }]);
 
     return ModuleManager;
-}();
+})();
 
 },{"./util":7,"./version":8}],5:[function(require,module,exports){
 'use strict';
@@ -407,12 +407,12 @@ function MoeNotification() {
 },{}],6:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikiplus UI Framework
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikiplus UI Framework
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+    value: true
 });
 exports.UI = undefined;
 
@@ -424,186 +424,186 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var UI = exports.UI = function () {
-	function UI() {
-		_classCallCheck(this, UI);
-	}
+var UI = exports.UI = (function () {
+    function UI() {
+        _classCallCheck(this, UI);
+    }
 
-	_createClass(UI, null, [{
-		key: 'createDialog',
+    _createClass(UI, null, [{
+        key: 'createDialog',
 
-		/**
-   * 建立对话框
-   * @param {String} option.info 信息
-   * @param {String} option.title = "Wikiplus" 标题栏
-   * @param {Object} option.mode 按钮标题和它的返回值，默认值如下
-   * mode: [
-   *     {id: "Yes", text: _("Yes"), res: true}, 
-   *     {id: "No", text: _("No"), res: false}, 
-   * ]
-   */
-		value: function createDialog(option) {
-			var info = option.info || '';
-			var title = option.title || (0, _i18n2.default)('Wikiplus');
-			var mode = option.mode || [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }];
+        /**
+         * 建立对话框
+         * @param {String} option.info 信息
+         * @param {String} option.title = "Wikiplus" 标题栏
+         * @param {Object} option.mode 按钮标题和它的返回值，默认值如下
+         * mode: [
+         *     {id: "Yes", text: _("Yes", "right"), res: true}, 
+         *     {id: "No", text: _("No", "right"), res: false}, 
+         * ]
+         */
+        value: function createDialog(option) {
+            var info = option.info || '';
+            var title = option.title || (0, _i18n2.default)('Wikiplus');
+            var mode = option.mode || [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }];
 
-			return new Promise(function (resolve, reject) {
-				var notice = $('<div>').text(info).attr('id', 'Wikiplus-InterBox-Content');
-				var content = $('<div>').append(notice).append($('<hr>'));
-				var _iteratorNormalCompletion = true;
-				var _didIteratorError = false;
-				var _iteratorError = undefined;
+            return new Promise(function (resolve, reject) {
+                var notice = $('<div>').text(info).attr('id', 'Wikiplus-InterBox-Content');
+                var content = $('<div>').append(notice).append($('<hr>'));
+                var _iteratorNormalCompletion = true;
+                var _didIteratorError = false;
+                var _iteratorError = undefined;
 
-				try {
-					for (var _iterator = mode[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-						var _btnOpt = _step.value;
+                try {
+                    for (var _iterator = mode[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                        var _btnOpt = _step.value;
 
-						var dialogBtn = $('<div>').addClass('Wikiplus-InterBox-Btn').attr('id', 'Wikiplus-InterBox-Btn' + _btnOpt.id).text(_btnOpt.text).data('value', _btnOpt.res);
-						content.append(dialogBtn);
-					}
-				} catch (err) {
-					_didIteratorError = true;
-					_iteratorError = err;
-				} finally {
-					try {
-						if (!_iteratorNormalCompletion && _iterator.return) {
-							_iterator.return();
-						}
-					} finally {
-						if (_didIteratorError) {
-							throw _iteratorError;
-						}
-					}
-				}
+                        var dialogBtn = $('<div>').addClass('Wikiplus-InterBox-Btn').attr('id', 'Wikiplus-InterBox-Btn' + _btnOpt.id).text(_btnOpt.text).data('value', _btnOpt.res);
+                        content.append(dialogBtn);
+                    }
+                } catch (err) {
+                    _didIteratorError = true;
+                    _iteratorError = err;
+                } finally {
+                    try {
+                        if (!_iteratorNormalCompletion && _iterator.return) {
+                            _iterator.return();
+                        }
+                    } finally {
+                        if (_didIteratorError) {
+                            throw _iteratorError;
+                        }
+                    }
+                }
 
-				UI.createBox({
-					title: title,
-					content: content,
-					callback: function callback() {
-						var _iteratorNormalCompletion2 = true;
-						var _didIteratorError2 = false;
-						var _iteratorError2 = undefined;
+                UI.createBox({
+                    title: title,
+                    content: content,
+                    callback: function callback() {
+                        var _iteratorNormalCompletion2 = true;
+                        var _didIteratorError2 = false;
+                        var _iteratorError2 = undefined;
 
-						try {
-							var _loop = function _loop() {
-								var btnOpt = _step2.value;
+                        try {
+                            var _loop = function _loop() {
+                                var btnOpt = _step2.value;
 
-								$('#Wikiplus-InterBox-Btn' + btnOpt.id).click(function () {
-									var resValue = $('#Wikiplus-InterBox-Btn' + btnOpt.id).data('value');
-									UI.closeBox();
-									resolve(resValue);
-								});
-							};
+                                $('#Wikiplus-InterBox-Btn' + btnOpt.id).click(function () {
+                                    var resValue = $('#Wikiplus-InterBox-Btn' + btnOpt.id).data('value');
+                                    UI.closeBox();
+                                    resolve(resValue);
+                                });
+                            };
 
-							for (var _iterator2 = mode[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-								_loop();
-							}
-						} catch (err) {
-							_didIteratorError2 = true;
-							_iteratorError2 = err;
-						} finally {
-							try {
-								if (!_iteratorNormalCompletion2 && _iterator2.return) {
-									_iterator2.return();
-								}
-							} finally {
-								if (_didIteratorError2) {
-									throw _iteratorError2;
-								}
-							}
-						}
-					}
-				});
-			});
-		}
+                            for (var _iterator2 = mode[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                                _loop();
+                            }
+                        } catch (err) {
+                            _didIteratorError2 = true;
+                            _iteratorError2 = err;
+                        } finally {
+                            try {
+                                if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                    _iterator2.return();
+                                }
+                            } finally {
+                                if (_didIteratorError2) {
+                                    throw _iteratorError2;
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
 
-		/**
-   * 关闭Wikiplus弹出框
-   */
+        /**
+         * 关闭Wikiplus弹出框
+         */
 
-	}, {
-		key: 'closeBox',
-		value: function closeBox() {
-			$('.Wikiplus-InterBox').fadeOut('fast', function () {
-				$(this).remove();
-			});
-		}
+    }, {
+        key: 'closeBox',
+        value: function closeBox() {
+            $('.Wikiplus-InterBox').fadeOut('fast', function () {
+                $(this).remove();
+            });
+        }
 
-		/**
-   * 画框
-   * @param {String} option.title 标题
-   * @param {HTML} option.content 内容
-   * @param {Integer} option.width = 600 宽度，单位为px
-   * @param {function()} option.callback 回调函数
-   */
+        /**
+         * 画框
+         * @param {String} option.title 标题
+         * @param {HTML} option.content 内容
+         * @param {Integer} option.width = 600 宽度，单位为px
+         * @param {function()} option.callback 回调函数
+         */
 
-	}, {
-		key: 'createBox',
-		value: function createBox(option) {
-			var title = option.title || (0, _i18n2.default)("Wikiplus");
-			var content = option.content || "";
-			var width = option.width || 600;
-			var callback = option.callback || new Function();
+    }, {
+        key: 'createBox',
+        value: function createBox(option) {
+            var title = option.title || (0, _i18n2.default)("Wikiplus");
+            var content = option.content || "";
+            var width = option.width || 600;
+            var callback = option.callback || new Function();
 
-			//检查是否已存在
-			if ($('.Wikiplus-InterBox').length > 0) {
-				$('.Wikiplus-InterBox').each(function () {
-					$(this).remove();
-				});
-			}
+            //检查是否已存在
+            if ($('.Wikiplus-InterBox').length > 0) {
+                $('.Wikiplus-InterBox').each(function () {
+                    $(this).remove();
+                });
+            }
 
-			var clientWidth = document.body.clientWidth;
-			var clientHeight = document.body.clientHeight;
-			var diglogBox = $('<div>').addClass('Wikiplus-InterBox').css({
-				'margin-left': clientWidth / 2 - width / 2 + 'px',
-				'top': $(document).scrollTop() + clientHeight * 0.2,
-				'display': 'none'
-			}).append($('<div>').addClass('Wikiplus-InterBox-Header').html(title)).append($('<div>').addClass('Wikiplus-InterBox-Content').append(content)).append($('<span>').text('×').addClass('Wikiplus-InterBox-Close'));
-			$('body').append(diglogBox);
-			$('.Wikiplus-InterBox').width(width + 'px');
-			$('.Wikiplus-InterBox-Close').click(function () {
-				$(this).parent().fadeOut('fast', function () {
-					window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
-					$(this).remove();
-				});
-			});
-			//拖曳
-			var bindDragging = function bindDragging(element) {
-				element.mousedown(function (e) {
-					var baseX = e.clientX;
-					var baseY = e.clientY;
-					var baseOffsetX = element.parent().offset().left;
-					var baseOffsetY = element.parent().offset().top;
-					$(document).mousemove(function (e) {
-						element.parent().css({
-							'margin-left': baseOffsetX + e.clientX - baseX,
-							'top': baseOffsetY + e.clientY - baseY
-						});
-					});
-					$(document).mouseup(function () {
-						element.unbind('mousedown');
-						$(document).unbind('mousemove');
-						$(document).unbind('mouseup');
-						bindDragging(element);
-					});
-				});
-			};
-			bindDragging($('.Wikiplus-InterBox-Header'));
-			$('.Wikiplus-InterBox').fadeIn(500);
-			callback();
-		}
-	}]);
+            var clientWidth = document.body.clientWidth;
+            var clientHeight = document.body.clientHeight;
+            var diglogBox = $('<div>').addClass('Wikiplus-InterBox').css({
+                'margin-left': clientWidth / 2 - width / 2 + 'px',
+                'top': $(document).scrollTop() + clientHeight * 0.2,
+                'display': 'none'
+            }).append($('<div>').addClass('Wikiplus-InterBox-Header').html(title)).append($('<div>').addClass('Wikiplus-InterBox-Content').append(content)).append($('<span>').text('×').addClass('Wikiplus-InterBox-Close'));
+            $('body').append(diglogBox);
+            $('.Wikiplus-InterBox').width(width + 'px');
+            $('.Wikiplus-InterBox-Close').click(function () {
+                $(this).parent().fadeOut('fast', function () {
+                    window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
+                    $(this).remove();
+                });
+            });
+            //拖曳
+            var bindDragging = function bindDragging(element) {
+                element.mousedown(function (e) {
+                    var baseX = e.clientX;
+                    var baseY = e.clientY;
+                    var baseOffsetX = element.parent().offset().left;
+                    var baseOffsetY = element.parent().offset().top;
+                    $(document).mousemove(function (e) {
+                        element.parent().css({
+                            'margin-left': baseOffsetX + e.clientX - baseX,
+                            'top': baseOffsetY + e.clientY - baseY
+                        });
+                    });
+                    $(document).mouseup(function () {
+                        element.unbind('mousedown');
+                        $(document).unbind('mousemove');
+                        $(document).unbind('mouseup');
+                        bindDragging(element);
+                    });
+                });
+            };
+            bindDragging($('.Wikiplus-InterBox-Header'));
+            $('.Wikiplus-InterBox').fadeIn(500);
+            callback();
+        }
+    }]);
 
-	return UI;
-}();
+    return UI;
+})();
 
 },{"./i18n":2}],7:[function(require,module,exports){
 "use strict";
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+    value: true
 });
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -612,70 +612,84 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * Wikiplus util library
  */
 
-var Util = exports.Util = function () {
-	function Util() {
-		_classCallCheck(this, Util);
-	}
+var Util = exports.Util = (function () {
+    function Util() {
+        _classCallCheck(this, Util);
+    }
 
-	_createClass(Util, null, [{
-		key: "loadCss",
+    _createClass(Util, null, [{
+        key: "loadCss",
 
-		//Load css (jQuery required)
-		value: function loadCss(path) {
-			var cssNode = document.createElement('link');
-			$(cssNode).attr({
-				rel: "stylesheet",
-				type: "text/css",
-				href: path
-			});
-			$("head").append(cssNode);
-		}
-		//Load js (jQuery required)
+        //Load css (jQuery required)
+        value: function loadCss(path) {
+            var cssNode = document.createElement('link');
+            $(cssNode).attr({
+                rel: "stylesheet",
+                type: "text/css",
+                href: path
+            });
+            $("head").append(cssNode);
+        }
+        //Load js (jQuery required)
 
-	}, {
-		key: "loadJs",
-		value: function loadJs(path) {
-			var jsnode = document.createElement('script');
-			$(jsnode).attr({
-				type: 'text/javascript',
-				async: false,
-				src: path
-			});
-			$("head").append(jsnode);
-		}
-		//save local config
+    }, {
+        key: "loadJs",
+        value: function loadJs(path) {
+            var jsnode = document.createElement('script');
+            $(jsnode).attr({
+                type: 'text/javascript',
+                async: false,
+                src: path
+            });
+            $("head").append(jsnode);
+        }
+        //save local config
 
-	}, {
-		key: "setLocalConfig",
-		value: function setLocalConfig(key) {
-			var value = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
-			var isObj = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+    }, {
+        key: "setLocalConfig",
+        value: function setLocalConfig(key) {
+            var value = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+            var isObj = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
-			key = "Wikiplus-" + key;
-			if (isObj) {
-				localStorage[key] = JSON.stringify(value);
-			} else {
-				localStorage[key] = value;
-			}
-		}
-		//get local config
+            key = "Wikiplus-" + key;
+            if (isObj) {
+                localStorage[key] = JSON.stringify(value);
+            } else {
+                localStorage[key] = value;
+            }
+        }
+        //get local config
 
-	}, {
-		key: "getLocalConfig",
-		value: function getLocalConfig(key) {
-			var isObj = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+    }, {
+        key: "getLocalConfig",
+        value: function getLocalConfig(key) {
+            var isObj = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-			key = "Wikiplus-" + key;
-			if (isObj) {
-				return JSON.parse(localStorage[key]);
-			} else {
-				return localStorage[key];
-			}
-		}
-	}]);
+            key = "Wikiplus-" + key;
+            if (isObj) {
+                return JSON.parse(localStorage[key]);
+            } else {
+                return localStorage[key];
+            }
+        }
+        //Run once at Wikiplus init.
 
-	return Util;
-}();
+    }, {
+        key: "scopeConfigInit",
+        value: function scopeConfigInit() {
+            String.prototype.seti18n = function () {
+                var argc = arguments.length;
+                var res = this;
+                for (var i = 1; i <= argc && i <= 9; i++) {
+                    res = res.replace(new RegExp("\\$" + i, "g"), arguments[i - 1]);
+                }
+                return res;
+            };
+        }
+    }]);
+
+    return Util;
+})();
 
 },{}],8:[function(require,module,exports){
 "use strict";
