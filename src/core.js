@@ -40,7 +40,7 @@ export class Wikiplus {
 			let install = function () {
 				Util.setLocalConfig('isInstall', 'True');
 				Util.setLocalConfig('Version', Version.VERSION);
-				Util.setLocalConfig('StartUseAt', new Date().valueOf());
+				Util.setLocalConfig('StartUseAt', '' + new Date().valueOf());
 				Util.setLocalConfig('StartEditCount', mw.config.values.wgUserEditCount);
 				self.notice.create.success(_('Wikiplus installed, enjoy it'));
 			};
