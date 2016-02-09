@@ -1,6 +1,6 @@
 {
     "language": "default",
-    "update_time": "2016-02-09",
+    "update_time": "2016-02-09 23:26:49",
     "defaultScope": {
 
 "Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?":
@@ -24,6 +24,9 @@
 "Yes":
 "<Translate Here>",
 
+"hit_abusefilter":
+"<Translate Here>"
+
     },
     "rightScope": {
 
@@ -31,7 +34,7 @@
 "<Translate Here>",
 
 "Yes":
-"<Translate Here>",
+"<Translate Here>"
 
-    },
+    }
 }

@@ -207,26 +207,41 @@ module.exports = function (grunt) {
         grunt.log.ok("共找到 " + i18nCount + " 个i18n引用。");
         //排序去重
         defaultScope = arrayunique(defaultScope);
+        var scopeCount = 0; //scope计数
         for (var scope in Scopes) {
             Scopes[scope] = arrayunique(Scopes[scope]);
+            scopeCount++;
         }
         //生成
         var languageDefaultContent = '{\n' +
             '    "language": "default",\n' +
-            '    "update_time": "' + grunt.template.today("yyyy-mm-dd") + '",\n' +
+            '    "update_time": "' + grunt.template.today("yyyy-mm-dd HH:MM:ss") + '",\n' +
             '    "defaultScope": {\n\n';
-        for (var stri in defaultScope) {
-            languageDefaultContent += '"' + defaultScope[stri] + '":\n' +
-            '"<Translate Here>",\n\n';
+        for (var stri = 0; stri < defaultScope.length; stri++) {
+            languageDefaultContent += '"' + defaultScope[stri] + '":\n';
+            if (stri != defaultScope.length - 1) {
+                languageDefaultContent += '"<Translate Here>",\n\n';
+            } else {
+                languageDefaultContent += '"<Translate Here>"\n\n';
+            }
         }
         languageDefaultContent += '    },\n';
-        for (var scope in Scopes){
+        var processedScope = 0;
+        for (var scope in Scopes) {
             languageDefaultContent += '    "' + scope + 'Scope": {\n\n';
-            for(var strj in Scopes[scope]){
-                languageDefaultContent += '"' + Scopes[scope][strj] +'":\n' +
-                '"<Translate Here>",\n\n';
+            for (var strj = 0; strj < Scopes[scope].length; strj++) {
+                languageDefaultContent += '"' + Scopes[scope][strj] + '":\n';
+                if (strj != Scopes[scope].length - 1) {
+                    languageDefaultContent += '"<Translate Here>",\n\n';
+                } else {
+                    languageDefaultContent += '"<Translate Here>"\n\n';
+                }
             }
-            languageDefaultContent += "    },\n";
+            if (processedScope != scopeCount - 1) {
+                languageDefaultContent += "    },\n";
+            } else {
+                languageDefaultContent += "    }\n";
+            }
         }
         languageDefaultContent += "}";
 

@@ -6,6 +6,7 @@ return array(
 	'^$' => 'Index/index',
 	'^rank$' => 'Index/rank',
     '^getmodule$' => 'Module/Index',
+    '^lang' => 'i18n/Index',
 	
 	'^api/meta$' => 'Data/meta',
 	'^api/recentavgtime' => 'Data/recentAvgTime',
