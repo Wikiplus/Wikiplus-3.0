@@ -16,7 +16,8 @@ export class Wikiplus {
         this.Version = Version;
         this.notice = notice;
         
-		console.log(`Wikiplus-3.0 v${Version.VERSION}`);
+        console.log(`Wikiplus-3.0 v${Version.VERSION}`);
+        Util.scopeConfigInit();
 		Util.loadCss(Version.scriptURL + "/Wikiplus.css");
 		this.checkInstall();
 	}

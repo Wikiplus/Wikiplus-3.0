@@ -53,6 +53,7 @@ var Wikiplus = exports.Wikiplus = (function () {
 		this.notice = notice;
 
 		console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
+		_util.Util.scopeConfigInit();
 		_util.Util.loadCss(_version.Version.scriptURL + "/Wikiplus.css");
 		this.checkInstall();
 	}
@@ -603,7 +604,7 @@ var UI = exports.UI = (function () {
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+    value: true
 });
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -613,68 +614,82 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 
 var Util = exports.Util = (function () {
-	function Util() {
-		_classCallCheck(this, Util);
-	}
+    function Util() {
+        _classCallCheck(this, Util);
+    }
 
-	_createClass(Util, null, [{
-		key: "loadCss",
+    _createClass(Util, null, [{
+        key: "loadCss",
 
-		//Load css (jQuery required)
-		value: function loadCss(path) {
-			var cssNode = document.createElement('link');
-			$(cssNode).attr({
-				rel: "stylesheet",
-				type: "text/css",
-				href: path
-			});
-			$("head").append(cssNode);
-		}
-		//Load js (jQuery required)
+        //Load css (jQuery required)
+        value: function loadCss(path) {
+            var cssNode = document.createElement('link');
+            $(cssNode).attr({
+                rel: "stylesheet",
+                type: "text/css",
+                href: path
+            });
+            $("head").append(cssNode);
+        }
+        //Load js (jQuery required)
 
-	}, {
-		key: "loadJs",
-		value: function loadJs(path) {
-			var jsnode = document.createElement('script');
-			$(jsnode).attr({
-				type: 'text/javascript',
-				async: false,
-				src: path
-			});
-			$("head").append(jsnode);
-		}
-		//save local config
+    }, {
+        key: "loadJs",
+        value: function loadJs(path) {
+            var jsnode = document.createElement('script');
+            $(jsnode).attr({
+                type: 'text/javascript',
+                async: false,
+                src: path
+            });
+            $("head").append(jsnode);
+        }
+        //save local config
 
-	}, {
-		key: "setLocalConfig",
-		value: function setLocalConfig(key) {
-			var value = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
-			var isObj = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+    }, {
+        key: "setLocalConfig",
+        value: function setLocalConfig(key) {
+            var value = arguments.length <= 1 || arguments[1] === undefined ? "" : arguments[1];
+            var isObj = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
 
-			key = "Wikiplus-" + key;
-			if (isObj) {
-				localStorage[key] = JSON.stringify(value);
-			} else {
-				localStorage[key] = value;
-			}
-		}
-		//get local config
+            key = "Wikiplus-" + key;
+            if (isObj) {
+                localStorage[key] = JSON.stringify(value);
+            } else {
+                localStorage[key] = value;
+            }
+        }
+        //get local config
 
-	}, {
-		key: "getLocalConfig",
-		value: function getLocalConfig(key) {
-			var isObj = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+    }, {
+        key: "getLocalConfig",
+        value: function getLocalConfig(key) {
+            var isObj = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-			key = "Wikiplus-" + key;
-			if (isObj) {
-				return JSON.parse(localStorage[key]);
-			} else {
-				return localStorage[key];
-			}
-		}
-	}]);
+            key = "Wikiplus-" + key;
+            if (isObj) {
+                return JSON.parse(localStorage[key]);
+            } else {
+                return localStorage[key];
+            }
+        }
+        //Run once at Wikiplus init.
 
-	return Util;
+    }, {
+        key: "scopeConfigInit",
+        value: function scopeConfigInit() {
+            String.prototype.seti18n = function () {
+                var argc = arguments.length;
+                var res = this;
+                for (var i = 1; i <= argc && i <= 9; i++) {
+                    res = res.replace(new RegExp("\\$" + i, "g"), arguments[i - 1]);
+                }
+                return res;
+            };
+        }
+    }]);
+
+    return Util;
 })();
 
 },{}],8:[function(require,module,exports){

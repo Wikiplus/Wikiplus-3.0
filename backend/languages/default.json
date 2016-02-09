@@ -1,0 +1,37 @@
+{
+    "language": "default",
+    "update_time": "2016-02-09",
+    "defaultScope": {
+
+"Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?":
+"<Translate Here>",
+
+"Install Wikiplus":
+"<Translate Here>",
+
+"No":
+"<Translate Here>",
+
+"Test Run":
+"<Translate Here>",
+
+"Wikiplus":
+"<Translate Here>",
+
+"Wikiplus installed, enjoy it":
+"<Translate Here>",
+
+"Yes":
+"<Translate Here>",
+
+    },
+    "rightScope": {
+
+"No":
+"<Translate Here>",
+
+"Yes":
+"<Translate Here>",
+
+    },
+}
