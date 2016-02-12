@@ -33,11 +33,16 @@ export class Util {
     }
     //get local config
     static getLocalConfig(key, isObj = false) {
-        key = "Wikiplus-" + key;
-        if (isObj) {
-            return JSON.parse(localStorage[key]);
-        } else {
-            return localStorage[key];
+        try{
+            key = "Wikiplus-" + key;
+            if (isObj) {
+                return JSON.parse(localStorage[key]);
+            } else {
+                return localStorage[key];
+            }
+        }
+        catch(e){
+            return undefined;
         }
     }
     //Run once at Wikiplus init.

@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.3
- * 2016-02-09
+ * 2016-02-12
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -15,7 +15,352 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /* global mw */
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Wikipage = undefined;
+
+var _api = require('./api');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } /**
+                                                                                                                                                           * Wikipage
+                                                                                                                                                           * MediaWiki Front-end SDK
+                                                                                                                                                           */
+
+var Wikipage = exports.Wikipage = function Wikipage() {
+    var title = arguments.length <= 0 || arguments[0] === undefined ? window.mw.config.values.wgPageName : arguments[0];
+
+    _classCallCheck(this, Wikipage);
+
+    // 查询本页面基础信息
+    Promise.all([_api.API.getEditToken(title), _api.API.getTimeStamp(title)]).then(function (data) {
+        console.log(data);
+    });
+};
+
+},{"./api":2}],2:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Mediawiki API Wrapper
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.API = undefined;
+
+var _i18n = require('./i18n');
+
+var _i18n2 = _interopRequireDefault(_i18n);
+
+var _version = require('./version');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var API = exports.API = function () {
+    function API() {
+        _classCallCheck(this, API);
+    }
+
+    _createClass(API, null, [{
+        key: 'getAPIURL',
+
+        /**
+         * 返回API地址
+         * @return {string} API API地址
+         */
+        value: function getAPIURL() {
+            return location.protocol + '//' + location.host + window.mw.config.values.wgScriptPath + '/api.php';
+        }
+        /**
+         * 返回当前页页面名。
+            * @return {string} pageName 页面标题
+         */
+
+    }, {
+        key: 'getThisPageName',
+        value: function getThisPageName() {
+            var pageName = window.mw.config.values.wgPageName;
+            if (pageName === undefined) {
+                throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
+            } else {
+                    return pageName;
+                }
+        }
+        /**
+         * 返回编辑令牌
+         * @return Promise
+         */
+
+    }, {
+        key: 'getEditToken',
+        value: function getEditToken(title) {
+            return new Promise(function (resolve, reject) {
+                if (window.mw.user.tokens.get('editToken') && window.mw.user.tokens.get('editToken') !== '+\\') {
+                    resolve(window.mw.user.tokens.get('editToken'));
+                } else {
+                    // 前端拿不到edittoken 通过API取
+                    $.ajax({
+                        url: self.API,
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            'action': 'query',
+                            'meta': 'tokens',
+                            'format': 'json'
+                        },
+                        success: function success(data) {
+                            if (data.query && data.query.tokens && data.query.tokens.csrftoken && data.query.tokens.csrftoken !== '+\\') {
+                                resolve(data.query.tokens.csrftoken);
+                            } else {
+                                reject(new Error('Fail to get the EditToken'));
+                            }
+                        },
+                        error: function error(e) {
+                            reject(new Error('Fail to get the EditToken'));
+                        }
+                    });
+                }
+            });
+        }
+        /**
+         * 获取编辑起始时间戳
+         * @param {string} title 页面标题
+         * @return Promise
+         */
+
+    }, {
+        key: 'getTimeStamp',
+        value: function getTimeStamp(title) {
+            var _this = this;
+
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: _this.getAPIURL(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        'action': 'query',
+                        'prop': 'revisions|info',
+                        'titles': title,
+                        'rvprop': 'timestamp',
+                        'format': 'json'
+                    },
+                    beforeSend: function beforeSend() {
+                        console.time('获得页面基础信息时间耗时');
+                    },
+                    success: function success(data) {
+                        if (data && data.query && data.query.pages) {
+                            var info = data.query.pages;
+                            for (var key in info) {
+                                if (key !== '-1') {
+                                    if (info[key].revisions && info[key].revisions.length > 0) {
+                                        resolve(info[key].revisions[0].timestamp);
+                                        console.timeEnd('获得页面基础信息时间耗时');
+                                    } else {
+                                        reject(new Error('Fail to get the timestamp of this page.'));
+                                    }
+                                } else {
+                                    if (window.mw.config.values.wgArticleId === 0) {
+                                        reject(new Error("Can't get timestamps of empty pages."));
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    error: function error(e) {
+                        reject(new Error('Fail to get the timestamp of this page.'));
+                    }
+                });
+            });
+        }
+        /**
+         * 页面编辑
+         * @param {object} config
+         */
+
+    }, {
+        key: 'edit',
+        value: function edit(config) {
+            var _this2 = this;
+
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: _this2.getAPIURL(),
+                    data: $.extend({
+                        'action': 'edit',
+                        'format': 'json',
+                        'text': config.content,
+                        'title': config.title,
+                        'token': config.editToken,
+                        'basetimestamp': config.timeStamp,
+                        'summary': config.summary
+                    }, config.addtionalConfig || {}),
+                    success: function success(data) {
+                        if (data && data.edit) {
+                            if (data.edit.result && data.edit.result == 'Success') {
+                                resolve();
+                            } else {
+                                if (data.edit.code) {
+                                    //防滥用过滤器
+                                    reject(new Error('hit_abusefilter', (0, _i18n2.default)('hit_abusefilter') + ':' + data.edit.info.replace('/Hit AbuseFilter: /ig', '') + '<br><small>' + data.edit.warning + '</small>'));
+                                } else {
+                                    reject(new Error('unknown_edit_error'));
+                                }
+                            }
+                        }
+                        // 一会儿再回来处理这里的错误。
+                        else if (data && data.error && data.error.code) {} else if (data.code) {} else {}
+                    },
+                    error: function error(e) {
+                        reject(new Error('Fail to edit this page due to network reasons.'));
+                    }
+                });
+            });
+        }
+        /**
+         * 编辑段落
+         * @param {object} config 
+         */
+
+    }, {
+        key: 'editSection',
+        value: function editSection(config) {
+            return this.edit({
+                "title": config.title,
+                "content": config.content,
+                "editToken": config.editToken,
+                "timeStamp": config.timeStamp,
+                "summary": config.summary,
+                "addtionalConfig": {
+                    "section": config.section
+                }
+            });
+        }
+        /**
+         * 重定向至
+         * @param {string} target 目标页面
+         * @param {string} editToken 编辑令牌
+         * @param {object} config 自定义设置
+         */
+
+    }, {
+        key: 'redirectTo',
+        value: function redirectTo(target, editToken, config) {
+            return this.edit($.extend({
+                "title": window.mw.config.values.wgPageName,
+                "content": '#REDIRECT [[' + target + ']]',
+                "editToken": editToken,
+                "summary": (0, _i18n2.default)('Redirect [[' + window.mw.config.values.wgPageName + ']] to [[' + target + ']] via Wikiplus')
+            }, config));
+        }
+
+        /**
+         * 重定向从
+         * @param {string} origin 源页面
+         * @param {string} editToken 编辑令牌
+         * @param {object} config 自定义设置
+         */
+
+    }, {
+        key: 'redirectFrom',
+        value: function redirectFrom(origin, editToken, config) {
+            return this.edit($.extend({
+                "title": origin,
+                "content": '#REDIRECT [[' + window.mw.config.values.wgPageName + ']]',
+                "editToken": editToken,
+                "summary": (0, _i18n2.default)('Redirect [[' + origin + ']] to [[' + window.mw.config.values.wgPageName + ']] via Wikiplus')
+            }, config));
+        }
+        /**
+         * 获取页面WikiText
+         * @param {string} title 页面名
+         * @param {string} section 段落编号(可选)
+         * @param {string} revision 修订版本号(可选)
+         * @return Promise
+         */
+
+    }, {
+        key: 'getWikiText',
+        value: function getWikiText(title) {
+            var section = arguments.length <= 1 || arguments[1] === undefined ? '' : arguments[1];
+            var revision = arguments.length <= 2 || arguments[2] === undefined ? '' : arguments[2];
+
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    url: location.protocol + '//' + location.host + window.mw.config.values.wgScriptPath + '/index.php',
+                    type: "GET",
+                    dataType: "text",
+                    cache: false,
+                    data: {
+                        'title': title,
+                        'action': 'raw'
+                    },
+                    beforeSend: function beforeSend() {
+                        console.time('获得页面文本耗时');
+                    },
+                    success: function success(data) {
+                        resolve(data);
+                        console.timeEnd('获得页面文本耗时');
+                    },
+                    error: function error(e) {
+                        reject(new Error('Fail to get the WikiText of this page.'));
+                    }
+                });
+            });
+        }
+
+        /**
+         * 解析WikiText
+         * @param {string} wikitext
+         */
+
+    }, {
+        key: 'parseWikiText',
+        value: function parseWikiText() {
+            var _this3 = this;
+
+            var wikitext = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+
+            return new Promise(function (resolve, reject) {
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        'format': 'json',
+                        'action': 'parse',
+                        'text': wikitext,
+                        'title': _this3.getThisPageName(),
+                        'pst': 'true'
+                    },
+                    url: _this3.getAPIURL(),
+                    success: function success(data) {
+                        if (data && data.parse && data.parse.text) {
+                            resolve(data.parse.text['*']);
+                        } else {
+                            reject(new Error('Fail to parse WikiText.'));
+                        }
+                    },
+                    error: function error(e) {
+                        reject(new Error('Fail to parse WikiText due to network reasons.'));
+                    }
+                });
+            });
+        }
+    }]);
+
+    return API;
+}();
+
+},{"./i18n":4,"./version":10}],3:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* global mw */
 /**
  * Wikiplus Core
  */
@@ -37,11 +382,15 @@ var _ui = require('./ui');
 
 var _moduleManager = require('./moduleManager');
 
+var _api = require('./api');
+
+var _Wikipage = require('./Wikipage');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Wikiplus = exports.Wikiplus = (function () {
+var Wikiplus = exports.Wikiplus = function () {
 	//初始化
 
 	function Wikiplus(notice) {
@@ -51,6 +400,8 @@ var Wikiplus = exports.Wikiplus = (function () {
 		this.Util = _util.Util;
 		this.Version = _version.Version;
 		this.notice = notice;
+		this.API = _api.API;
+		this.Wikipage = _Wikipage.Wikipage;
 
 		console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
 		_util.Util.scopeConfigInit();
@@ -102,9 +453,9 @@ var Wikiplus = exports.Wikiplus = (function () {
 	}]);
 
 	return Wikiplus;
-})();
+}();
 
-},{"./i18n":2,"./moduleManager":4,"./ui":6,"./util":7,"./version":8}],2:[function(require,module,exports){
+},{"./Wikipage":1,"./api":2,"./i18n":4,"./moduleManager":6,"./ui":8,"./util":9,"./version":10}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -121,7 +472,7 @@ function i18n() {
   return value;
 }
 
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 var _core = require('./core');
@@ -141,12 +492,12 @@ $(function () {
 	wikiplus.start();
 });
 
-},{"./core":1,"./moenotice":5}],4:[function(require,module,exports){
+},{"./core":3,"./moenotice":7}],6:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikiplus-mmr
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikiplus-mmr
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -159,7 +510,7 @@ var _util = require('./util');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ModuleManager = exports.ModuleManager = (function () {
+var ModuleManager = exports.ModuleManager = function () {
     function ModuleManager() {
         _classCallCheck(this, ModuleManager);
 
@@ -316,9 +667,9 @@ var ModuleManager = exports.ModuleManager = (function () {
     }]);
 
     return ModuleManager;
-})();
+}();
 
-},{"./util":7,"./version":8}],5:[function(require,module,exports){
+},{"./util":9,"./version":10}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -404,12 +755,12 @@ function MoeNotification() {
     }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 'use strict';
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikiplus UI Framework
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikiplus UI Framework
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -424,7 +775,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var UI = exports.UI = (function () {
+var UI = exports.UI = function () {
     function UI() {
         _classCallCheck(this, UI);
     }
@@ -595,12 +946,12 @@ var UI = exports.UI = (function () {
     }]);
 
     return UI;
-})();
+}();
 
-},{"./i18n":2}],7:[function(require,module,exports){
+},{"./i18n":4}],9:[function(require,module,exports){
 "use strict";
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -612,7 +963,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * Wikiplus util library
  */
 
-var Util = exports.Util = (function () {
+var Util = exports.Util = function () {
     function Util() {
         _classCallCheck(this, Util);
     }
@@ -665,11 +1016,15 @@ var Util = exports.Util = (function () {
         value: function getLocalConfig(key) {
             var isObj = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
 
-            key = "Wikiplus-" + key;
-            if (isObj) {
-                return JSON.parse(localStorage[key]);
-            } else {
-                return localStorage[key];
+            try {
+                key = "Wikiplus-" + key;
+                if (isObj) {
+                    return JSON.parse(localStorage[key]);
+                } else {
+                    return localStorage[key];
+                }
+            } catch (e) {
+                return undefined;
             }
         }
         //Run once at Wikiplus init.
@@ -689,9 +1044,9 @@ var Util = exports.Util = (function () {
     }]);
 
     return Util;
-})();
+}();
 
-},{}],8:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -711,6 +1066,6 @@ var Version = exports.Version = function Version() {
 ;
 Version.VERSION = "0.0.4";
 Version.releaseNote = "mmr这就差不多了吧。";
-Version.scriptURL = "https://127.0.0.1";
+Version.scriptURL = "http://127.0.0.1/Wikiplus-3.0";
 
-},{}]},{},[3]);
+},{}]},{},[5]);

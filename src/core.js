@@ -8,6 +8,9 @@ import { Util } from './util'
 import { UI } from './ui'
 import { ModuleManager } from './moduleManager'
 
+import { API } from './api'
+import { Wikipage } from './Wikipage'
+
 export class Wikiplus {
 	//初始化
 	constructor(notice) {
@@ -15,6 +18,8 @@ export class Wikiplus {
         this.Util = Util;
         this.Version = Version;
         this.notice = notice;
+		this.API = API;
+		this.Wikipage = Wikipage;
         
         console.log(`Wikiplus-3.0 v${Version.VERSION}`);
         Util.scopeConfigInit();

@@ -7,10 +7,10 @@ import { Version } from './version'
 export class API {
     /**
      * 返回API地址
-     * @return {stirng} API API地址
+     * @return {string} API API地址
      */
     static getAPIURL() {
-        return `${Version.scriptURL}${window.mw.config.values.wgScriptPath}/api.php`;
+        return `${location.protocol}//${location.host}${window.mw.config.values.wgScriptPath}/api.php`;
     }
 	/**
 	 * 返回当前页页面名。
@@ -173,16 +173,45 @@ export class API {
         });
     }
     /**
+     * 重定向至
+     * @param {string} target 目标页面
+     * @param {string} editToken 编辑令牌
+     * @param {object} config 自定义设置
+     */
+    static redirectTo(target, editToken, config){
+        return this.edit($.extend({
+            "title" : window.mw.config.values.wgPageName,
+            "content" : `#REDIRECT [[${target}]]`,
+            "editToken" : editToken,
+            "summary" : _(`Redirect [[${window.mw.config.values.wgPageName}]] to [[${target}]] via Wikiplus`),
+        },config));
+    }
+
+    /**
+     * 重定向从
+     * @param {string} origin 源页面
+     * @param {string} editToken 编辑令牌
+     * @param {object} config 自定义设置
+     */
+    static redirectFrom(origin ,editToken, config){
+        return this.edit($.extend({
+            "title" : origin,
+            "content" : `#REDIRECT [[${window.mw.config.values.wgPageName}]]`,
+            "editToken" : editToken,
+            "summary" : _(`Redirect [[${origin}]] to [[${window.mw.config.values.wgPageName}]] via Wikiplus`)
+        },config));
+    }
+    /**
      * 获取页面WikiText
      * @param {string} title 页面名
-     * @param {stirng} section 段落编号(可选)
+     * @param {string} section 段落编号(可选)
      * @param {string} revision 修订版本号(可选)
      * @return Promise
      */
     static getWikiText(title, section = '', revision = '') {
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: location.protocol + '//' + location.host + window.mw.config.values.wgScriptPath + '/index.php',
+                url: `${location.protocol}//${location.host}${window.mw.config.values.wgScriptPath}/index.php`,
                 type: "GET",
                 dataType: "text",
                 cache: false,
