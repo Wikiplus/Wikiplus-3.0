@@ -15,6 +15,11 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikipage
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * MediaWiki Front-end SDK
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -22,21 +27,70 @@ exports.Wikipage = undefined;
 
 var _api = require('./api');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } } /**
-                                                                                                                                                           * Wikipage
-                                                                                                                                                           * MediaWiki Front-end SDK
-                                                                                                                                                           */
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Wikipage = exports.Wikipage = function Wikipage() {
-    var title = arguments.length <= 0 || arguments[0] === undefined ? window.mw.config.values.wgPageName : arguments[0];
+var Wikipage = exports.Wikipage = function () {
+    function Wikipage() {
+        var _this = this;
 
-    _classCallCheck(this, Wikipage);
+        var title = arguments.length <= 0 || arguments[0] === undefined ? window.mw.config.values.wgPageName : arguments[0];
 
-    // 查询本页面基础信息
-    Promise.all([_api.API.getEditToken(title), _api.API.getTimeStamp(title)]).then(function (data) {
-        console.log(data);
-    });
-};
+        _classCallCheck(this, Wikipage);
+
+        var self = this;
+        this.title = title;
+        // 查询本页面基础信息
+        Promise.all([_api.API.getEditToken(title), _api.API.getTimeStamp(title)]).then(function (data) {
+            _this.editToken = data[0];
+            _this.timeStamp = data[1];
+        }).catch(function (e) {
+            console.log('获取页面基础信息失败');
+        });
+    }
+
+    /**
+     * 重定向至
+     * @param {string} target 目标页面
+     */
+
+    _createClass(Wikipage, [{
+        key: 'redirectTo',
+        value: function redirectTo(target) {
+            return _api.API.redirectTo(target, this.editToken);
+        }
+
+        /**
+         * 重定向从
+         * @param {string} origin 源页面
+         */
+
+    }, {
+        key: 'redirectFrom',
+        value: function redirectFrom(origin) {
+            return _api.API.redirectFrom(origin, this.editToken);
+        }
+
+        /**
+         * 修改本页面内容
+         * @param {string} content 新的页面内容
+         * @param {string} summary 编辑摘要
+         */
+
+    }, {
+        key: 'setContent',
+        value: function setContent(content, summary) {
+            return _api.API.edit({
+                "title": this.title,
+                "editToken": this.editToken,
+                "timeStamp": this.timeStamp,
+                "content": content,
+                "summary": summary
+            });
+        }
+    }]);
+
+    return Wikipage;
+}();
 
 },{"./api":2}],2:[function(require,module,exports){
 'use strict';
