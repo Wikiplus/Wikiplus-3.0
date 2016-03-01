@@ -26,6 +26,19 @@ export class API {
         }
     }
     /**
+     * 返回当前的用户名
+     * @return {string} username 当前登录用户名
+     */
+    static getUsername(){
+        let getUserid = window.mw.user.id;
+        if(getUserid === undefined){
+            throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
+        }
+        else{
+            return getUserid();
+        }
+    }
+    /**
      * 返回编辑令牌
      * @return Promise
      */

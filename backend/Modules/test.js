@@ -7,5 +7,9 @@
     "init": function(self, dpds){
         console.log("Hello! I'm test.");
         return true;
+    },
+    "test": "Test",
+    "testMethod": function(){
+        console.log(this.test);
     }
 })

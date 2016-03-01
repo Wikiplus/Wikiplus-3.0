@@ -4,6 +4,31 @@
 import _ from './i18n'
 
 export class UI {
+    /**
+     * 在左侧工具栏添加链接
+     * @param {string} option.name 显示出来的链接名
+     * @param {string} option.link 链接地址
+     * @param {string} option.title 提示文字
+     * @param {string} option.id li一级的id，可用来绑定事件（不建议，建议使用callback）
+     * @param {function} option.callback 回调函数，用户在点击链接后运行。
+     */
+    static addLinkInToolbox(option) {
+        if(option == undefined){
+            throw Error("need options for parameter.");
+        }
+        
+        let name = option.name || _('Blank link');
+        let link = option.link || 'javascript:;';
+        let title = option.title || name;
+        let id = option.id || 't-wikiplus-tblink' + (new Date().getTime());
+        let callback = option.callback || new Function();
+
+        let eleNode = $("<li>").attr({ "id": id }).append($("<a>").attr({ "href": link, "title": title }).html(name));
+        $("#p-tb>div>ul").append(eleNode);
+        eleNode.on("click", function (event) {
+            callback(event);
+        })
+    }
 	/**
 	 * 建立对话框
 	 * @param {String} option.info 信息

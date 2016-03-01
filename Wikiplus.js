@@ -1,6 +1,6 @@
 /**
- * Wikiplus-3.0 v0.0.3
- * 2016-02-12
+ * Wikiplus-3.0 v0.0.5
+ * 2016-03-02
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -8,17 +8,17 @@
  * https://github.com/Wikiplus/MoeNotification
  *
  * Copyright by Wikiplus, Eridanus Sora, Ted Zyzsdy and other contributors
- * Licensed by Apache License 2.0
+ * Licensed under Apache License 2.0
  * http://wikiplus-app.smartgslb.com/
  */
  
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikipage
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * MediaWiki Front-end SDK
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikipage
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * MediaWiki Front-end SDK
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -29,16 +29,27 @@ var _api = require('./api');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Wikipage = exports.Wikipage = function () {
+var Wikipage = exports.Wikipage = (function () {
+    /**
+     * 构造函数
+     * @param {string} title 页面标题
+     * @param {string} revision 页面修订版本号
+     * @param {function} callback 回调函数
+     */
+
     function Wikipage() {
+        var title = arguments.length <= 0 || arguments[0] === undefined ? window.mw.config.values.wgPageName : arguments[0];
+
         var _this = this;
 
-        var title = arguments.length <= 0 || arguments[0] === undefined ? window.mw.config.values.wgPageName : arguments[0];
+        var revision = arguments.length <= 1 || arguments[1] === undefined ? window.mw.config.values.wgRevisionId : arguments[1];
+        var callback = arguments.length <= 2 || arguments[2] === undefined ? new Function() : arguments[2];
 
         _classCallCheck(this, Wikipage);
 
         var self = this;
         this.title = title;
+        this.revision = revision;
         // 查询本页面基础信息
         Promise.all([_api.API.getEditToken(title), _api.API.getTimeStamp(title)]).then(function (data) {
             _this.editToken = data[0];
@@ -87,17 +98,27 @@ var Wikipage = exports.Wikipage = function () {
                 "summary": summary
             });
         }
+
+        /**
+         * 获得当前页面的WikiText
+         */
+
+    }, {
+        key: 'getWikiText',
+        value: function getWikiText() {
+            return _api.API.getWikiText(this.title, this.revision);
+        }
     }]);
 
     return Wikipage;
-}();
+})();
 
 },{"./api":2}],2:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Mediawiki API Wrapper
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Mediawiki API Wrapper
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -114,7 +135,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var API = exports.API = function () {
+var API = exports.API = (function () {
     function API() {
         _classCallCheck(this, API);
     }
@@ -142,6 +163,21 @@ var API = exports.API = function () {
                 throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
             } else {
                     return pageName;
+                }
+        }
+        /**
+         * 返回当前的用户名
+         * @return {string} username 当前登录用户名
+         */
+
+    }, {
+        key: 'getUsername',
+        value: function getUsername() {
+            var getUserid = window.mw.user.id;
+            if (getUserid === undefined) {
+                throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
+            } else {
+                    return getUserid();
                 }
         }
         /**
@@ -409,12 +445,12 @@ var API = exports.API = function () {
     }]);
 
     return API;
-}();
+})();
 
 },{"./i18n":4,"./version":10}],3:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* global mw */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /* global mw */
 /**
  * Wikiplus Core
  */
@@ -444,7 +480,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Wikiplus = exports.Wikiplus = function () {
+var Wikiplus = exports.Wikiplus = (function () {
 	//初始化
 
 	function Wikiplus(notice) {
@@ -467,6 +503,7 @@ var Wikiplus = exports.Wikiplus = function () {
 		key: 'start',
 		value: function start() {
 			this.mmr = new _moduleManager.ModuleManager();
+			this.loadCoreFunctions();
 			this.notice.create.success((0, _i18n2.default)("Test Run"));
 		}
 	}, {
@@ -504,10 +541,52 @@ var Wikiplus = exports.Wikiplus = function () {
 				})();
 			}
 		}
+	}, {
+		key: 'loadCoreFunctions',
+		value: function loadCoreFunctions() {
+			var coreConfig = new CoreConfig();
+			coreConfig.init();
+		}
 	}]);
 
 	return Wikiplus;
-}();
+})();
+
+var CoreConfig = (function () {
+	function CoreConfig() {
+		_classCallCheck(this, CoreConfig);
+	}
+
+	_createClass(CoreConfig, [{
+		key: 'init',
+		value: function init() {
+			var self = this;
+
+			if (_api.API.getThisPageName().substr(5) == _api.API.getUsername()) {
+				_ui.UI.addLinkInToolbox({
+					name: (0, _i18n2.default)("Wikiplus Config"),
+					title: (0, _i18n2.default)("Configurations for global Wikiplus."),
+					callback: function callback() {
+						self.drawConfigBox();
+					}
+				});
+			}
+		}
+	}, {
+		key: 'drawConfigBox',
+		value: function drawConfigBox() {
+			_ui.UI.createBox({
+				title: (0, _i18n2.default)("Wikiplus Config"),
+				content: $('<div id="wikiplus-config-area"><p>' + (0, _i18n2.default)("You could change Wikiplus settings here. These settings will work on the whole Wiki.") + '</p><br></div>').append($('<p><b>' + (0, _i18n2.default)("Language") + '</b>: <input type="text" id="wikiplus-config-it-language"></p>')).append($('<p><b>' + (0, _i18n2.default)("Send Statistics") + '</b>: <label><input type="radio" id="wikiplus-config-ir-stat" value="true" name="wikiplus-config-stat">' + (0, _i18n2.default)("Allow") + '</label><label><input name="wikiplus-config-stat" value="false" type="radio" id="wikiplus-config-ir-nostat">' + (0, _i18n2.default)("Disallow") + '</label></p>')).append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:</p><p>' + (0, _i18n2.default)("Type comma \",\" saparated module names here.") + '</p><textarea id="wikiplus-config-it-modules"></textarea>')),
+				callback: function callback() {
+					console.log("~Test");
+				}
+			});
+		}
+	}]);
+
+	return CoreConfig;
+})();
 
 },{"./Wikipage":1,"./api":2,"./i18n":4,"./moduleManager":6,"./ui":8,"./util":9,"./version":10}],4:[function(require,module,exports){
 "use strict";
@@ -549,9 +628,9 @@ $(function () {
 },{"./core":3,"./moenotice":7}],6:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikiplus-mmr
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikiplus-mmr
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -564,7 +643,7 @@ var _util = require('./util');
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ModuleManager = exports.ModuleManager = function () {
+var ModuleManager = exports.ModuleManager = (function () {
     function ModuleManager() {
         _classCallCheck(this, ModuleManager);
 
@@ -721,7 +800,7 @@ var ModuleManager = exports.ModuleManager = function () {
     }]);
 
     return ModuleManager;
-}();
+})();
 
 },{"./util":9,"./version":10}],7:[function(require,module,exports){
 'use strict';
@@ -812,9 +891,9 @@ function MoeNotification() {
 },{}],8:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Wikiplus UI Framework
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * Wikiplus UI Framework
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -829,14 +908,39 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var UI = exports.UI = function () {
+var UI = exports.UI = (function () {
     function UI() {
         _classCallCheck(this, UI);
     }
 
     _createClass(UI, null, [{
-        key: 'createDialog',
+        key: 'addLinkInToolbox',
 
+        /**
+         * 在左侧工具栏添加链接
+         * @param {string} option.name 显示出来的链接名
+         * @param {string} option.link 链接地址
+         * @param {string} option.title 提示文字
+         * @param {string} option.id li一级的id，可用来绑定事件（不建议，建议使用callback）
+         * @param {function} option.callback 回调函数，用户在点击链接后运行。
+         */
+        value: function addLinkInToolbox(option) {
+            if (option == undefined) {
+                throw Error("need options for parameter.");
+            }
+
+            var name = option.name || (0, _i18n2.default)('Blank link');
+            var link = option.link || 'javascript:;';
+            var title = option.title || name;
+            var id = option.id || 't-wikiplus-tblink' + new Date().getTime();
+            var callback = option.callback || new Function();
+
+            var eleNode = $("<li>").attr({ "id": id }).append($("<a>").attr({ "href": link, "title": title }).html(name));
+            $("#p-tb>div>ul").append(eleNode);
+            eleNode.on("click", function (event) {
+                callback(event);
+            });
+        }
         /**
          * 建立对话框
          * @param {String} option.info 信息
@@ -847,6 +951,9 @@ var UI = exports.UI = function () {
          *     {id: "No", text: _("No", "right"), res: false}, 
          * ]
          */
+
+    }, {
+        key: 'createDialog',
         value: function createDialog(option) {
             var info = option.info || '';
             var title = option.title || (0, _i18n2.default)('Wikiplus');
@@ -1000,12 +1107,12 @@ var UI = exports.UI = function () {
     }]);
 
     return UI;
-}();
+})();
 
 },{"./i18n":4}],9:[function(require,module,exports){
 "use strict";
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -1017,7 +1124,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  * Wikiplus util library
  */
 
-var Util = exports.Util = function () {
+var Util = exports.Util = (function () {
     function Util() {
         _classCallCheck(this, Util);
     }
@@ -1098,7 +1205,7 @@ var Util = exports.Util = function () {
     }]);
 
     return Util;
-}();
+})();
 
 },{}],10:[function(require,module,exports){
 "use strict";
@@ -1118,8 +1225,8 @@ var Version = exports.Version = function Version() {
 };
 
 ;
-Version.VERSION = "0.0.4";
-Version.releaseNote = "mmr这就差不多了吧。";
-Version.scriptURL = "http://127.0.0.1/Wikiplus-3.0";
+Version.VERSION = "0.0.5";
+Version.releaseNote = "系统配置框测试。";
+Version.scriptURL = "https://127.0.0.1/";
 
 },{}]},{},[5]);

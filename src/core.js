@@ -28,6 +28,7 @@ export class Wikiplus {
 	}
 	start() {
         this.mmr = new ModuleManager();
+        this.loadCoreFunctions();
 		this.notice.create.success(_("Test Run"));
 	}
 	checkInstall() {
@@ -64,4 +65,36 @@ export class Wikiplus {
 			});
 		}
 	}
+    loadCoreFunctions(){
+        let coreConfig = new CoreConfig();
+        coreConfig.init();
+    }
+}
+
+class CoreConfig{
+    init(){
+        let self = this;
+        
+        if(API.getThisPageName().substr(5) == API.getUsername()){
+            UI.addLinkInToolbox({
+                name: _("Wikiplus Config"),
+                title: _("Configurations for global Wikiplus."),
+                callback: function(){
+                    self.drawConfigBox();
+                }
+            })
+        }
+    }
+    drawConfigBox(){
+        UI.createBox({
+            title: _("Wikiplus Config"),
+            content: $(`<div id="wikiplus-config-area"><p>${_("You could change Wikiplus settings here. These settings will work on the whole Wiki.")}</p><br></div>`)
+                .append($(`<p><b>${_("Language")}</b>: <input type="text" id="wikiplus-config-it-language"></p>`))
+                .append($(`<p><b>${_("Send Statistics")}</b>: <label><input type="radio" id="wikiplus-config-ir-stat" value="true" name="wikiplus-config-stat">${_("Allow")}</label><label><input name="wikiplus-config-stat" value="false" type="radio" id="wikiplus-config-ir-nostat">${_("Disallow")}</label></p>`))
+                .append($(`<p><b>${_("Loaded Modules")}</b>:</p><p>${_("Type comma \",\" saparated module names here.")}</p><textarea id="wikiplus-config-it-modules"></textarea>`)),
+            callback: function(){
+                console.log("~Test")
+            }
+        })
+    }
 }
