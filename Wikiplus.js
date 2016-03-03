@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-03-02
+ * 2016-03-04
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -33,25 +33,18 @@ var Wikipage = exports.Wikipage = (function () {
     /**
      * 构造函数
      * @param {string} title 页面标题
-     * @param {string} revision 页面修订版本号
-     * @param {function} callback 回调函数
      */
 
     function Wikipage() {
-        var title = arguments.length <= 0 || arguments[0] === undefined ? window.mw.config.values.wgPageName : arguments[0];
-
         var _this = this;
 
-        var revision = arguments.length <= 1 || arguments[1] === undefined ? window.mw.config.values.wgRevisionId : arguments[1];
-        var callback = arguments.length <= 2 || arguments[2] === undefined ? new Function() : arguments[2];
+        var title = arguments.length <= 0 || arguments[0] === undefined ? window.mw.config.values.wgPageName : arguments[0];
 
         _classCallCheck(this, Wikipage);
 
-        var self = this;
         this.title = title;
-        this.revision = revision;
         // 查询本页面基础信息
-        Promise.all([_api.API.getEditToken(title), _api.API.getTimeStamp(title)]).then(function (data) {
+        this.info = Promise.all([_api.API.getEditToken(title), _api.API.getTimeStamp(title)]).then(function (data) {
             _this.editToken = data[0];
             _this.timeStamp = data[1];
         }).catch(function (e) {
@@ -67,7 +60,11 @@ var Wikipage = exports.Wikipage = (function () {
     _createClass(Wikipage, [{
         key: 'redirectTo',
         value: function redirectTo(target) {
-            return _api.API.redirectTo(target, this.editToken);
+            var _this2 = this;
+
+            this.info = this.info.then(function () {
+                _api.API.redirectTo(target, _this2.editToken);
+            });
         }
 
         /**
@@ -78,7 +75,11 @@ var Wikipage = exports.Wikipage = (function () {
     }, {
         key: 'redirectFrom',
         value: function redirectFrom(origin) {
-            return _api.API.redirectFrom(origin, this.editToken);
+            var _this3 = this;
+
+            this.info = this.info.then(function () {
+                _api.API.redirectFrom(origin, _this3.editToken);
+            });
         }
 
         /**
@@ -90,23 +91,36 @@ var Wikipage = exports.Wikipage = (function () {
     }, {
         key: 'setContent',
         value: function setContent(content, summary) {
-            return _api.API.edit({
-                "title": this.title,
-                "editToken": this.editToken,
-                "timeStamp": this.timeStamp,
-                "content": content,
-                "summary": summary
+            var _this4 = this;
+
+            this.info = this.info.then(function () {
+                _api.API.edit({
+                    "title": _this4.title,
+                    "editToken": _this4.editToken,
+                    "timeStamp": _this4.timeStamp,
+                    "content": content,
+                    "summary": summary
+                });
             });
         }
 
         /**
          * 获得当前页面的WikiText
+         * @param {string} revision (可选)修订版本
          */
 
     }, {
         key: 'getWikiText',
-        value: function getWikiText() {
-            return _api.API.getWikiText(this.title, this.revision);
+        value: function getWikiText(revision) {
+            var _this5 = this;
+
+            return new Promise(function (res, rej) {
+                _this5.info = _this5.info.then(function () {
+                    _api.API.getWikiText(_this5.title, revision).then(function (data) {
+                        res(data);
+                    });
+                });
+            });
         }
     }]);
 
@@ -456,7 +470,7 @@ var _createClass = (function () { function defineProperties(target, props) { for
  */
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+    value: true
 });
 exports.Wikiplus = undefined;
 
@@ -481,111 +495,145 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Wikiplus = exports.Wikiplus = (function () {
-	//初始化
+    //初始化
 
-	function Wikiplus(notice) {
-		_classCallCheck(this, Wikiplus);
+    function Wikiplus(notice) {
+        _classCallCheck(this, Wikiplus);
 
-		this.UI = _ui.UI;
-		this.Util = _util.Util;
-		this.Version = _version.Version;
-		this.notice = notice;
-		this.API = _api.API;
-		this.Wikipage = _Wikipage.Wikipage;
+        this.UI = _ui.UI;
+        this.Util = _util.Util;
+        this.Version = _version.Version;
+        this.notice = notice;
+        this.API = _api.API;
+        this.Wikipage = _Wikipage.Wikipage;
 
-		console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
-		_util.Util.scopeConfigInit();
-		_util.Util.loadCss(_version.Version.scriptURL + "/Wikiplus.css");
-		this.checkInstall();
-	}
+        console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
+        _util.Util.scopeConfigInit();
+        _util.Util.loadCss(_version.Version.scriptURL + "/Wikiplus.css");
+        this.checkInstall();
+    }
 
-	_createClass(Wikiplus, [{
-		key: 'start',
-		value: function start() {
-			this.mmr = new _moduleManager.ModuleManager();
-			this.loadCoreFunctions();
-			this.notice.create.success((0, _i18n2.default)("Test Run"));
-		}
-	}, {
-		key: 'checkInstall',
-		value: function checkInstall() {
-			var self = this;
-			var isInstall = _util.Util.getLocalConfig('isInstall');
-			if (isInstall === "True") {
-				//Updated Case
-				if (_util.Util.getLocalConfig('Version') !== _version.Version.VERSION) {
-					this.notice.create.success("Wikiplus-3.0 v" + _version.Version.VERSION);
-					this.notice.create.success(_version.Version.releaseNote);
-					_util.Util.setLocalConfig('Version', _version.Version.VERSION);
-				}
-			} else {
-				(function () {
-					//安装
-					var install = function install() {
-						_util.Util.setLocalConfig('isInstall', 'True');
-						_util.Util.setLocalConfig('Version', _version.Version.VERSION);
-						_util.Util.setLocalConfig('StartUseAt', '' + new Date().valueOf());
-						_util.Util.setLocalConfig('StartEditCount', mw.config.values.wgUserEditCount);
-						self.notice.create.success((0, _i18n2.default)('Wikiplus installed, enjoy it'));
-					};
+    _createClass(Wikiplus, [{
+        key: 'start',
+        value: function start() {
+            this.mmr = new _moduleManager.ModuleManager();
+            this.loadCoreFunctions();
+            this.notice.create.success((0, _i18n2.default)("Test Run"));
+        }
+    }, {
+        key: 'checkInstall',
+        value: function checkInstall() {
+            var self = this;
+            var isInstall = _util.Util.getLocalConfig('isInstall');
+            if (isInstall === "True") {
+                //Updated Case
+                if (_util.Util.getLocalConfig('Version') !== _version.Version.VERSION) {
+                    this.notice.create.success("Wikiplus-3.0 v" + _version.Version.VERSION);
+                    this.notice.create.success(_version.Version.releaseNote);
+                    _util.Util.setLocalConfig('Version', _version.Version.VERSION);
+                }
+            } else {
+                (function () {
+                    //安装
+                    var install = function install() {
+                        _util.Util.setLocalConfig('isInstall', 'True');
+                        _util.Util.setLocalConfig('Version', _version.Version.VERSION);
+                        _util.Util.setLocalConfig('StartUseAt', '' + new Date().valueOf());
+                        _util.Util.setLocalConfig('StartEditCount', mw.config.values.wgUserEditCount);
+                        self.notice.create.success((0, _i18n2.default)('Wikiplus installed, enjoy it'));
+                    };
 
-					_ui.UI.createDialog({
-						title: (0, _i18n2.default)('Install Wikiplus'),
-						info: (0, _i18n2.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
-						mode: [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }]
-					}).then(function (res) {
-						console.log("用户选择：" + (res ? "接受" : "拒绝"));
-						_util.Util.setLocalConfig('SendStatistics', res ? "True" : "False");
-						install();
-					});
-				})();
-			}
-		}
-	}, {
-		key: 'loadCoreFunctions',
-		value: function loadCoreFunctions() {
-			var coreConfig = new CoreConfig();
-			coreConfig.init();
-		}
-	}]);
+                    _ui.UI.createDialog({
+                        title: (0, _i18n2.default)('Install Wikiplus'),
+                        info: (0, _i18n2.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
+                        mode: [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }]
+                    }).then(function (res) {
+                        console.log("用户选择：" + (res ? "接受" : "拒绝"));
+                        _util.Util.setLocalConfig('SendStatistics', res ? "True" : "False");
+                        install();
+                    });
+                })();
+            }
+        }
+    }, {
+        key: 'loadCoreFunctions',
+        value: function loadCoreFunctions() {
+            var coreConfig = new CoreConfig();
+            coreConfig.init();
+        }
+    }]);
 
-	return Wikiplus;
+    return Wikiplus;
 })();
 
 var CoreConfig = (function () {
-	function CoreConfig() {
-		_classCallCheck(this, CoreConfig);
-	}
+    function CoreConfig() {
+        _classCallCheck(this, CoreConfig);
+    }
 
-	_createClass(CoreConfig, [{
-		key: 'init',
-		value: function init() {
-			var self = this;
+    _createClass(CoreConfig, [{
+        key: 'init',
+        value: function init() {
+            var self = this;
 
-			if (_api.API.getThisPageName().substr(5) == _api.API.getUsername()) {
-				_ui.UI.addLinkInToolbox({
-					name: (0, _i18n2.default)("Wikiplus Config"),
-					title: (0, _i18n2.default)("Configurations for global Wikiplus."),
-					callback: function callback() {
-						self.drawConfigBox();
-					}
-				});
-			}
-		}
-	}, {
-		key: 'drawConfigBox',
-		value: function drawConfigBox() {
-			_ui.UI.createBox({
-				title: (0, _i18n2.default)("Wikiplus Config"),
-				content: $('<div id="wikiplus-config-area"><p>' + (0, _i18n2.default)("You could change Wikiplus settings here. These settings will work on the whole Wiki.") + '</p><br></div>').append($('<p><b>' + (0, _i18n2.default)("Language") + '</b>: <input type="text" id="wikiplus-config-it-language"></p>')).append($('<p><b>' + (0, _i18n2.default)("Send Statistics") + '</b>: <label><input type="radio" id="wikiplus-config-ir-stat" value="true" name="wikiplus-config-stat">' + (0, _i18n2.default)("Allow") + '</label><label><input name="wikiplus-config-stat" value="false" type="radio" id="wikiplus-config-ir-nostat">' + (0, _i18n2.default)("Disallow") + '</label></p>')).append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:</p><p>' + (0, _i18n2.default)("Type comma \",\" saparated module names here.") + '</p><textarea id="wikiplus-config-it-modules"></textarea>')),
-				callback: function callback() {
-					console.log("~Test");
-				}
-			});
-		}
-	}]);
+            if (_api.API.getThisPageName().substr(5) == _api.API.getUsername()) {
+                _ui.UI.addLinkInToolbox({
+                    name: (0, _i18n2.default)("Wikiplus Config"),
+                    title: (0, _i18n2.default)("Configurations for global Wikiplus."),
+                    callback: function callback() {
+                        self.drawConfigBox();
+                    }
+                });
+            }
+        }
+    }, {
+        key: 'drawConfigBox',
+        value: function drawConfigBox() {
+            var boxContent = $('<div id="wikiplus-config-area"><p>' + (0, _i18n2.default)("You could change Wikiplus settings here. These settings will work on the whole Wiki.") + '</p><br></div>');
 
-	return CoreConfig;
+            //语言设置
+            var languageInput = $('<input type="text" id="wikiplus-config-it-language">').val(_util.Util.getLocalConfig("language"));
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Language") + '</b>: </p>').append(languageInput));
+
+            //是否发送统计信息
+            var statInput = $('<label><input type="radio" id="wikiplus-config-ir-stat" value="true" name="wikiplus-config-stat">' + (0, _i18n2.default)("Allow") + '</label>');
+            var noStatInput = $('<label><input name="wikiplus-config-stat" value="false" type="radio" id="wikiplus-config-ir-nostat">' + (0, _i18n2.default)("Disallow") + '</label>');
+            if (_util.Util.getLocalConfig("SendStatistics") == "True") {
+                statInput.find("input")[0].checked = true;
+                noStatInput.find("input")[0].checked = false;
+            } else {
+                statInput.find("input")[0].checked = false;
+                noStatInput.find("input")[0].checked = true;
+            }
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Send Statistics") + '</b>: </p>').append(statInput).append(noStatInput));
+
+            //需载入的模块
+            var modulesInput = $('<textarea id="wikiplus-config-it-modules"></textarea>').val(_util.Util.getLocalConfig("modules", true).join(", "));
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n2.default)("Type comma \",\" saparated module names here.") + '</p>').append(modulesInput));
+
+            //从服务器恢复设置
+            var loadConfigBtn = $('<input type="button" id="wikiplus-config-btn-loadconfig" value="' + (0, _i18n2.default)("Load Config") + '">');
+            boxContent.append($("<hr>")).append($('<p><b>' + (0, _i18n2.default)("Load Config from server") + '</b>: </p>').append(loadConfigBtn));
+
+            //保存和取消按钮
+            boxContent.append($('<hr><p>' + (0, _i18n2.default)("Your configuration will save at User:$1/Wikiplus-config.json on this wiki.").seti18n(_api.API.getUsername()) + '</p>'));
+            var saveConfigBtn = $('<input type="button" id="wikiplus-config-btn-save" class="Wikiplus-InterBox-Btn" value="' + (0, _i18n2.default)("Save") + '">');
+            var cancelConfigBtn = $('<input type="button" id="wikiplus-config-btn-cancel" class="Wikiplus-InterBox-Btn" value="' + (0, _i18n2.default)("Cancel") + '">');
+            cancelConfigBtn.click(function () {
+                _ui.UI.closeBox();
+            });
+
+            boxContent.append(cancelConfigBtn).append(saveConfigBtn);
+
+            //显示对话框
+            _ui.UI.createBox({
+                title: (0, _i18n2.default)("Wikiplus Config"),
+                content: boxContent
+            });
+        }
+    }]);
+
+    return CoreConfig;
 })();
 
 },{"./Wikipage":1,"./api":2,"./i18n":4,"./moduleManager":6,"./ui":8,"./util":9,"./version":10}],4:[function(require,module,exports){
