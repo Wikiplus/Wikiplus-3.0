@@ -69,6 +69,8 @@ export class Wikipage {
             this.info = this.info.then(() => {
                 API.getWikiText(this.title, revision).then(data => {
                     res(data);
+                }).catch(err => {
+                    rej(err);
                 });
             });
         });

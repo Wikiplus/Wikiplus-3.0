@@ -20,6 +20,7 @@ export class Wikiplus {
         this.notice = notice;
         this.API = API;
         this.Wikipage = Wikipage;
+        this.coreConfig = new CoreConfig(this.notice);
 
         console.log(`Wikiplus-3.0 v${Version.VERSION}`);
         Util.scopeConfigInit();
@@ -33,41 +34,46 @@ export class Wikiplus {
     }
     checkInstall() {
         let self = this;
-        let isInstall = Util.getLocalConfig('isInstall');
+        let isInstall = this.coreConfig.isInstall;
         if (isInstall === "True") {
             //Updated Case
-            if (Util.getLocalConfig('Version') !== Version.VERSION) {
+            if (this.coreConfig.Version !== Version.VERSION) {
                 this.notice.create.success("Wikiplus-3.0 v" + Version.VERSION);
                 this.notice.create.success(Version.releaseNote);
-                Util.setLocalConfig('Version', Version.VERSION);
+                this.coreConfig.Version = Version.VERSION;
             }
         } else {
             //安装
             let install = function () {
-                Util.setLocalConfig('isInstall', 'True');
-                Util.setLocalConfig('Version', Version.VERSION);
-                Util.setLocalConfig('StartUseAt', '' + new Date().valueOf());
-                Util.setLocalConfig('StartEditCount', mw.config.values.wgUserEditCount);
-                Util.setLocalConfig('language', window.navigator.language.toLowerCase());
+                self.coreConfig.isInstall = 'True';
+                self.coreConfig.Version = Version.VERSION;
+                self.coreConfig.StartUseAt = '' + new Date().valueOf();
+                self.coreConfig.StartEditCount = mw.config.values.wgUserEditCount;
+                self.coreConfig.language = window.navigator.language.toLowerCase();
                 self.notice.create.success(_('Wikiplus installed, enjoy it'));
             };
 
-            UI.createDialog({
-                title: _('Install Wikiplus'),
-                info: _('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
-                mode: [
-                    { id: "Yes", text: _("Yes"), res: true },
-                    { id: "No", text: _("No"), res: false }
-                ]
-            }).then(res => {
-                console.log("用户选择：" + (res ? "接受" : "拒绝"));
-                Util.setLocalConfig('SendStatistics', res ? "True" : "False");
+            this.coreConfig.loadConfigHelper().then(data=> {
+                delete data["updatetime"];
+                this.coreConfig.saveConfigToLocal(data);
                 install();
+            }).catch(err=> {
+                UI.createDialog({
+                    title: _('Install Wikiplus'),
+                    info: _('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
+                    mode: [
+                        { id: "Yes", text: _("Yes"), res: true },
+                        { id: "No", text: _("No"), res: false }
+                    ]
+                }).then(res => {
+                    console.log("用户选择：" + (res ? "接受" : "拒绝"));
+                    this.coreConfig.SendStatistics = res ? "True" : "False";
+                    install();
+                });
             });
         }
     }
     loadCoreFunctions() {
-        this.coreConfig = new CoreConfig(this.notice);
         this.coreConfig.init();
     }
 }
@@ -77,11 +83,6 @@ class CoreConfig {
         this.notice = notice;
     }
     init() {
-        //需要对象化存入的设置项列表，未设置或设置值为false的将以字符串形式存取。
-        this.objectiveConfig = {
-            "modules": true
-        };
-
         if (API.getThisPageName().substr(5) == API.getUsername()) {
             UI.addLinkInToolbox({
                 name: _("Wikiplus Config"),
@@ -113,7 +114,7 @@ class CoreConfig {
         
         //需载入的模块
         let modulesConfig = Util.getLocalConfig("modules", true);
-        if(modulesConfig === undefined){
+        if (modulesConfig === undefined) {
             modulesConfig = [];
         }
         let modulesInput = $(`<textarea id="wikiplus-config-it-modules"></textarea>`)
@@ -125,7 +126,7 @@ class CoreConfig {
         
         //从服务器恢复设置
         let loadConfigBtn = $(`<input type="button" id="wikiplus-config-btn-loadconfig" value="${_("Load Config") }">`)
-        loadConfigBtn.click(()=>{
+        loadConfigBtn.click(() => {
             this.notice.create.success(_("Checking if had configuration on this wiki."));
             this.loadConfig();
         });
@@ -175,7 +176,7 @@ class CoreConfig {
     }
     saveConfigToLocal(config) {
         for (let confKey in config) {
-            if (this.objectiveConfig[confKey]) {
+            if (CoreConfig.objectiveConfig[confKey]) {
                 Util.setLocalConfig(confKey, config[confKey], true);
             } else {
                 Util.setLocalConfig(confKey, config[confKey], false);
@@ -184,35 +185,102 @@ class CoreConfig {
         this.notice.create.success(_("Save config to local successfully."));
     }
     loadConfig() {
-        let configPage = new Wikipage(`User:${API.getUsername() }/Wikiplus-config.json`);
-        configPage.getWikiText().then(data=> {
-            if (data) {
-                try {
-                    let config = JSON.parse(data);
-                    if (config.updatetime) {
-                        UI.createDialog({
-                            info: _("Find a uploaded configuration of $1. Do you want to import this config now?").seti18n((new Date(config.updatetime).toLocaleString())),
-                            title: _("Confirm Import"),
-                            mode: [
-                                { id: "Yes", text: _("Yes"), res: true },
-                                { id: "No", text: _("No"), res: false }
-                            ]
-                        }).then(res=>{
-                            if(res){
-                                delete config["updatetime"];
-                                this.saveConfigToLocal(config);
-                            }
-                            UI.closeBox();
-                        });
-                    }
-                } catch (err) {
-                    this.notice.create.error("设置项无法解析。");
-                    UI.closeBox();
+        this.loadConfigHelper().then(config=> {
+            UI.createDialog({
+                info: _("Find a uploaded configuration of $1. Do you want to import this config now?").seti18n((new Date(config.updatetime).toLocaleString())),
+                title: _("Confirm Import"),
+                mode: [
+                    { id: "Yes", text: _("Yes"), res: true },
+                    { id: "No", text: _("No"), res: false }
+                ]
+            }).then(res=> {
+                if (res) {
+                    delete config["updatetime"];
+                    this.saveConfigToLocal(config);
                 }
-            } else {
-                this.notice.create.error("设置项载入失败：没有找到保存的设置项。");
                 UI.closeBox();
+            });
+        }).catch(res=> {
+            let errorInfo = "";
+            switch (res) {
+                case "invaild":
+                case "cannotparse":
+                    errorInfo = _("Saved configuration on server is invaild.");
+                    break;
+                case "empty":
+                    errorInfo = _("Can not find any configuration for you on this wiki.");
+                    break;
             }
-        })
+            this.notice.create.error(errorInfo);
+        });
+    }
+    loadConfigHelper() {
+        return new Promise((res, rej) => {
+            let configPage = new Wikipage(`User:${API.getUsername() }/Wikiplus-config.json`);
+            configPage.getWikiText().then(data=> {
+                if (data) {
+                    try {
+                        let config = JSON.parse(data);
+                        if (config.updatetime) {
+                            res(config);
+                        } else {
+                            rej("invaild");
+                        }
+                    } catch (err) {
+                        rej("cannotparse");
+                    }
+                } else {
+                    rej("empty");
+                }
+            }).catch(err => {
+                rej("empty");
+            })
+        });
+    }
+    get isInstall() {
+        return Util.getLocalConfig('isInstall');
+    }
+    set isInstall(value) {
+        Util.setLocalConfig('isInstall', value);
+    }
+    get Version() {
+        return Util.getLocalConfig('Version');
+    }
+    set Version(value) {
+        Util.setLocalConfig('Version', value);
+    }
+    get language() {
+        return Util.getLocalConfig('language');
+    }
+    set language(value) {
+        Util.setLocalConfig('language', value);
+    }
+    get StartUseAt() {
+        return Util.getLocalConfig('StartUseAt');
+    }
+    set StartUseAt(value) {
+        Util.setLocalConfig('StartUseAt', value);
+    }
+    get StartEditCount() {
+        return Util.getLocalConfig('StartEditCount');
+    }
+    set StartEditCount(value) {
+        Util.setLocalConfig('StartEditCount', value);
+    }
+    get SendStatistics() {
+        return Util.getLocalConfig('SendStatistics');
+    }
+    set SendStatistics(value) {
+        Util.setLocalConfig('SendStatistics', value);
+    }
+    get modules() {
+        return Util.getLocalConfig('modules', true);
+    }
+    set modules(object) {
+        Util.setLocalConfig('modules', object, true);
     }
 }
+//需要对象化存入的设置项列表，未设置或设置值为false的将以字符串形式存取。
+CoreConfig.objectiveConfig = {
+    "modules": true
+};
