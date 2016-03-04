@@ -48,7 +48,7 @@ var Wikipage = exports.Wikipage = (function () {
             _this.editToken = data[0];
             _this.timeStamp = data[1];
         }).catch(function (e) {
-            console.log('获取页面基础信息失败');
+            console.error('获取页面基础信息失败：', e);
         });
     }
 
@@ -93,13 +93,17 @@ var Wikipage = exports.Wikipage = (function () {
         value: function setContent(content, summary) {
             var _this4 = this;
 
-            this.info = this.info.then(function () {
-                _api.API.edit({
-                    "title": _this4.title,
-                    "editToken": _this4.editToken,
-                    "timeStamp": _this4.timeStamp,
-                    "content": content,
-                    "summary": summary
+            return new Promise(function (res, rej) {
+                _this4.info = _this4.info.then(function () {
+                    _api.API.edit({
+                        "title": _this4.title,
+                        "editToken": _this4.editToken,
+                        "timeStamp": _this4.timeStamp,
+                        "content": content,
+                        "summary": summary
+                    }).then(function (data) {
+                        res(data);
+                    });
                 });
             });
         }
@@ -266,17 +270,31 @@ var API = exports.API = (function () {
                                         console.timeEnd('获得页面基础信息时间耗时');
                                     } else {
                                         reject(new Error('Fail to get the timestamp of this page.'));
+                                        console.timeEnd('获得页面基础信息时间耗时');
                                     }
                                 } else {
-                                    if (window.mw.config.values.wgArticleId === 0) {
-                                        reject(new Error("Can't get timestamps of empty pages."));
+                                    if (info[-1]['missing'] !== undefined) {
+                                        console.info("页面未建立。");
+                                        resolve(undefined);
+                                        console.timeEnd('获得页面基础信息时间耗时');
+                                    } else {
+                                        reject(new Error("Can't get timestamps of special pages."));
+                                        console.timeEnd('获得页面基础信息时间耗时');
                                     }
+                                    //暂时废弃的写法
+                                    //if (window.mw.config.values.wgArticleId === 0) {
+                                    //    reject(new Error("Can't get timestamps of empty pages."));
+                                    //}
                                 }
                             }
-                        }
+                        } else {
+                                reject(new Error('Return result is invaild.'));
+                                console.timeEnd('获得页面基础信息时间耗时');
+                            }
                     },
                     error: function error(e) {
                         reject(new Error('Fail to get the timestamp of this page.'));
+                        console.timeEnd('获得页面基础信息时间耗时');
                     }
                 });
             });
@@ -308,7 +326,7 @@ var API = exports.API = (function () {
                     success: function success(data) {
                         if (data && data.edit) {
                             if (data.edit.result && data.edit.result == 'Success') {
-                                resolve();
+                                resolve(data.edit);
                             } else {
                                 if (data.edit.code) {
                                     //防滥用过滤器
@@ -540,6 +558,7 @@ var Wikiplus = exports.Wikiplus = (function () {
                         _util.Util.setLocalConfig('Version', _version.Version.VERSION);
                         _util.Util.setLocalConfig('StartUseAt', '' + new Date().valueOf());
                         _util.Util.setLocalConfig('StartEditCount', mw.config.values.wgUserEditCount);
+                        _util.Util.setLocalConfig('language', window.navigator.language.toLowerCase());
                         self.notice.create.success((0, _i18n2.default)('Wikiplus installed, enjoy it'));
                     };
 
@@ -558,8 +577,8 @@ var Wikiplus = exports.Wikiplus = (function () {
     }, {
         key: 'loadCoreFunctions',
         value: function loadCoreFunctions() {
-            var coreConfig = new CoreConfig();
-            coreConfig.init();
+            this.coreConfig = new CoreConfig(this.notice);
+            this.coreConfig.init();
         }
     }]);
 
@@ -567,21 +586,28 @@ var Wikiplus = exports.Wikiplus = (function () {
 })();
 
 var CoreConfig = (function () {
-    function CoreConfig() {
+    function CoreConfig(notice) {
         _classCallCheck(this, CoreConfig);
+
+        this.notice = notice;
     }
 
     _createClass(CoreConfig, [{
         key: 'init',
         value: function init() {
-            var self = this;
+            var _this = this;
+
+            //需要对象化存入的设置项列表，未设置或设置值为false的将以字符串形式存取。
+            this.objectiveConfig = {
+                "modules": true
+            };
 
             if (_api.API.getThisPageName().substr(5) == _api.API.getUsername()) {
                 _ui.UI.addLinkInToolbox({
                     name: (0, _i18n2.default)("Wikiplus Config"),
                     title: (0, _i18n2.default)("Configurations for global Wikiplus."),
                     callback: function callback() {
-                        self.drawConfigBox();
+                        _this.drawConfigBox();
                     }
                 });
             }
@@ -589,6 +615,8 @@ var CoreConfig = (function () {
     }, {
         key: 'drawConfigBox',
         value: function drawConfigBox() {
+            var _this2 = this;
+
             var boxContent = $('<div id="wikiplus-config-area"><p>' + (0, _i18n2.default)("You could change Wikiplus settings here. These settings will work on the whole Wiki.") + '</p><br></div>');
 
             //语言设置
@@ -608,11 +636,19 @@ var CoreConfig = (function () {
             boxContent.append($('<p><b>' + (0, _i18n2.default)("Send Statistics") + '</b>: </p>').append(statInput).append(noStatInput));
 
             //需载入的模块
-            var modulesInput = $('<textarea id="wikiplus-config-it-modules"></textarea>').val(_util.Util.getLocalConfig("modules", true).join(", "));
+            var modulesConfig = _util.Util.getLocalConfig("modules", true);
+            if (modulesConfig === undefined) {
+                modulesConfig = [];
+            }
+            var modulesInput = $('<textarea id="wikiplus-config-it-modules"></textarea>').val(modulesConfig.join(", "));
             boxContent.append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n2.default)("Type comma \",\" saparated module names here.") + '</p>').append(modulesInput));
 
             //从服务器恢复设置
             var loadConfigBtn = $('<input type="button" id="wikiplus-config-btn-loadconfig" value="' + (0, _i18n2.default)("Load Config") + '">');
+            loadConfigBtn.click(function () {
+                _this2.notice.create.success((0, _i18n2.default)("Checking if had configuration on this wiki."));
+                _this2.loadConfig();
+            });
             boxContent.append($("<hr>")).append($('<p><b>' + (0, _i18n2.default)("Load Config from server") + '</b>: </p>').append(loadConfigBtn));
 
             //保存和取消按钮
@@ -622,6 +658,16 @@ var CoreConfig = (function () {
             cancelConfigBtn.click(function () {
                 _ui.UI.closeBox();
             });
+            saveConfigBtn.click(function () {
+                var config = {};
+                config['language'] = languageInput.val();
+                config['SendStatistics'] = statInput.find("input")[0].checked ? "True" : "False";
+                config['modules'] = modulesInput.val().split(',').map(function (i) {
+                    return $.trim(i);
+                });
+
+                _this2.saveConfig(config);
+            });
 
             boxContent.append(cancelConfigBtn).append(saveConfigBtn);
 
@@ -629,6 +675,71 @@ var CoreConfig = (function () {
             _ui.UI.createBox({
                 title: (0, _i18n2.default)("Wikiplus Config"),
                 content: boxContent
+            });
+        }
+    }, {
+        key: 'saveConfig',
+        value: function saveConfig(config) {
+            var _this3 = this;
+
+            //保存至本地
+            this.saveConfigToLocal(config);
+            //保存至本Wiki的User:当前用户名/Wikiplus-config.json页面
+            config["updatetime"] = new Date().getTime();
+            var configString = JSON.stringify(config);
+            var configPage = new _Wikipage.Wikipage('User:' + _api.API.getUsername() + '/Wikiplus-config.json');
+            configPage.setContent(configString, "Update Config via Wikiplus").then(function (data) {
+                _this3.notice.create.success((0, _i18n2.default)("Save config to Server successfully."));
+                _ui.UI.closeBox();
+            }).catch(function (e) {
+                _this3.notice.create.error((0, _i18n2.default)("Save config to Server failed."));
+            });
+        }
+    }, {
+        key: 'saveConfigToLocal',
+        value: function saveConfigToLocal(config) {
+            for (var confKey in config) {
+                if (this.objectiveConfig[confKey]) {
+                    _util.Util.setLocalConfig(confKey, config[confKey], true);
+                } else {
+                    _util.Util.setLocalConfig(confKey, config[confKey], false);
+                }
+            }
+            this.notice.create.success((0, _i18n2.default)("Save config to local successfully."));
+        }
+    }, {
+        key: 'loadConfig',
+        value: function loadConfig() {
+            var _this4 = this;
+
+            var configPage = new _Wikipage.Wikipage('User:' + _api.API.getUsername() + '/Wikiplus-config.json');
+            configPage.getWikiText().then(function (data) {
+                if (data) {
+                    try {
+                        (function () {
+                            var config = JSON.parse(data);
+                            if (config.updatetime) {
+                                _ui.UI.createDialog({
+                                    info: (0, _i18n2.default)("Find a uploaded configuration of $1. Do you want to import this config now?").seti18n(new Date(config.updatetime).toLocaleString()),
+                                    title: (0, _i18n2.default)("Confirm Import"),
+                                    mode: [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }]
+                                }).then(function (res) {
+                                    if (res) {
+                                        delete config["updatetime"];
+                                        _this4.saveConfigToLocal(config);
+                                    }
+                                    _ui.UI.closeBox();
+                                });
+                            }
+                        })();
+                    } catch (err) {
+                        _this4.notice.create.error("设置项无法解析。");
+                        _ui.UI.closeBox();
+                    }
+                } else {
+                    _this4.notice.create.error("设置项载入失败：没有找到保存的设置项。");
+                    _ui.UI.closeBox();
+                }
             });
         }
     }]);
@@ -995,8 +1106,8 @@ var UI = exports.UI = (function () {
          * @param {String} option.title = "Wikiplus" 标题栏
          * @param {Object} option.mode 按钮标题和它的返回值，默认值如下
          * mode: [
-         *     {id: "Yes", text: _("Yes", "right"), res: true}, 
-         *     {id: "No", text: _("No", "right"), res: false}, 
+         *     {id: "Yes", text: _("Yes"), res: true}, 
+         *     {id: "No", text: _("No"), res: false}, 
          * ]
          */
 

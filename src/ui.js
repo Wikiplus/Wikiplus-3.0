@@ -35,8 +35,8 @@ export class UI {
 	 * @param {String} option.title = "Wikiplus" 标题栏
 	 * @param {Object} option.mode 按钮标题和它的返回值，默认值如下
 	 * mode: [
-	 *     {id: "Yes", text: _("Yes", "right"), res: true}, 
-	 *     {id: "No", text: _("No", "right"), res: false}, 
+	 *     {id: "Yes", text: _("Yes"), res: true}, 
+	 *     {id: "No", text: _("No"), res: false}, 
 	 * ]
 	 */
     static createDialog(option) {

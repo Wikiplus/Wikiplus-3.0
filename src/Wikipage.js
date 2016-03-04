@@ -15,7 +15,7 @@ export class Wikipage {
             this.editToken = data[0];
             this.timeStamp = data[1];
         }).catch((e) => {
-            console.log('获取页面基础信息失败');
+            console.error('获取页面基础信息失败：', e);
         });
     }
 
@@ -45,13 +45,17 @@ export class Wikipage {
      * @param {string} summary 编辑摘要
      */
     setContent(content, summary) {
-        this.info = this.info.then(() => {
-            API.edit({
-                "title": this.title,
-                "editToken": this.editToken,
-                "timeStamp": this.timeStamp,
-                "content": content,
-                "summary": summary
+        return new Promise((res, rej) => {
+            this.info = this.info.then(() => {
+                API.edit({
+                    "title": this.title,
+                    "editToken": this.editToken,
+                    "timeStamp": this.timeStamp,
+                    "content": content,
+                    "summary": summary
+                }).then(data=> {
+                    res(data);
+                });
             });
         });
     }

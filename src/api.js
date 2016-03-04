@@ -29,12 +29,12 @@ export class API {
      * 返回当前的用户名
      * @return {string} username 当前登录用户名
      */
-    static getUsername(){
+    static getUsername() {
         let getUserid = window.mw.user.id;
-        if(getUserid === undefined){
+        if (getUserid === undefined) {
             throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
         }
-        else{
+        else {
             return getUserid();
         }
     }
@@ -105,18 +105,32 @@ export class API {
                                 }
                                 else {
                                     reject(new Error('Fail to get the timestamp of this page.'));
+                                    console.timeEnd('获得页面基础信息时间耗时');
                                 }
                             }
                             else {
-                                if (window.mw.config.values.wgArticleId === 0) {
-                                    reject(new Error("Can't get timestamps of empty pages."));
+                                if (info[-1]['missing'] !== undefined) {
+                                    console.info("页面未建立。");
+                                    resolve(undefined);
+                                    console.timeEnd('获得页面基础信息时间耗时');
+                                } else {
+                                    reject(new Error("Can't get timestamps of special pages."));
+                                    console.timeEnd('获得页面基础信息时间耗时');
                                 }
+                                //暂时废弃的写法
+                                //if (window.mw.config.values.wgArticleId === 0) {
+                                //    reject(new Error("Can't get timestamps of empty pages."));
+                                //}
                             }
                         }
+                    } else {
+                        reject(new Error('Return result is invaild.'));
+                        console.timeEnd('获得页面基础信息时间耗时');
                     }
                 },
                 error: (e) => {
                     reject(new Error(`Fail to get the timestamp of this page.`));
+                    console.timeEnd('获得页面基础信息时间耗时');
                 }
             })
         })
@@ -143,7 +157,7 @@ export class API {
                 success: (data) => {
                     if (data && data.edit) {
                         if (data.edit.result && data.edit.result == 'Success') {
-                            resolve();
+                            resolve(data.edit);
                         }
                         else {
                             if (data.edit.code) {
@@ -191,13 +205,13 @@ export class API {
      * @param {string} editToken 编辑令牌
      * @param {object} config 自定义设置
      */
-    static redirectTo(target, editToken, config){
+    static redirectTo(target, editToken, config) {
         return this.edit($.extend({
-            "title" : window.mw.config.values.wgPageName,
-            "content" : `#REDIRECT [[${target}]]`,
-            "editToken" : editToken,
-            "summary" : _(`Redirect [[${window.mw.config.values.wgPageName}]] to [[${target}]] via Wikiplus`),
-        },config));
+            "title": window.mw.config.values.wgPageName,
+            "content": `#REDIRECT [[${target}]]`,
+            "editToken": editToken,
+            "summary": _(`Redirect [[${window.mw.config.values.wgPageName}]] to [[${target}]] via Wikiplus`),
+        }, config));
     }
 
     /**
@@ -206,13 +220,13 @@ export class API {
      * @param {string} editToken 编辑令牌
      * @param {object} config 自定义设置
      */
-    static redirectFrom(origin ,editToken, config){
+    static redirectFrom(origin, editToken, config) {
         return this.edit($.extend({
-            "title" : origin,
-            "content" : `#REDIRECT [[${window.mw.config.values.wgPageName}]]`,
-            "editToken" : editToken,
-            "summary" : _(`Redirect [[${origin}]] to [[${window.mw.config.values.wgPageName}]] via Wikiplus`)
-        },config));
+            "title": origin,
+            "content": `#REDIRECT [[${window.mw.config.values.wgPageName}]]`,
+            "editToken": editToken,
+            "summary": _(`Redirect [[${origin}]] to [[${window.mw.config.values.wgPageName}]] via Wikiplus`)
+        }, config));
     }
     /**
      * 获取页面WikiText
@@ -250,8 +264,8 @@ export class API {
      * 解析WikiText
      * @param {string} wikitext
      */
-    static parseWikiText(wikitext = ''){
-        return new Promise((resolve,reject)=>{
+    static parseWikiText(wikitext = '') {
+        return new Promise((resolve, reject) => {
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
@@ -263,15 +277,15 @@ export class API {
                     'pst': 'true'
                 },
                 url: this.getAPIURL(),
-                success : (data)=>{
+                success: (data) => {
                     if (data && data.parse && data.parse.text) {
                         resolve(data.parse.text['*']);
                     }
-                    else{
+                    else {
                         reject(new Error('Fail to parse WikiText.'));
                     }
                 },
-                error:(e)=>{
+                error: (e) => {
                     reject(new Error('Fail to parse WikiText due to network reasons.'));
                 }
             })
