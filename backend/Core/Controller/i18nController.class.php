@@ -1,6 +1,8 @@
 <?php
 class i18nController extends Controller {
     public function Index(){
+        header("Access-Control-Allow-Origin: *", true);
+        header("Access-Control-Max-Age: 86400", true);
         if(!isset($_GET['lang'])){
             header("X-Info: lang required", true, 400);
             exit();
@@ -16,8 +18,6 @@ class i18nController extends Controller {
         
         $jsonContent = file_get_contents($path);
         header("Content-Type: application/json", true);
-        header("Access-Control-Allow-Origin: *", true);
-        header("Access-Control-Max-Age: 86400", true);
         echo $jsonContent;
     }
 }

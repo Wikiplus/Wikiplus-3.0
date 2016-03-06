@@ -1,100 +1,100 @@
 {
-    "language": "default",
+    "language": "zh-cn",
     "update_time": "2016-03-07 01:45:01",
     "defaultScope": {
 
 "Allow":
-"<Translate Here>",
+"允许",
 
 "Blank link":
-"<Translate Here>",
+"空白链接",
 
 "Can not find any configuration for you on this wiki.":
-"<Translate Here>",
+"你没有在当前Wiki上存储配置。",
 
 "Cancel":
-"<Translate Here>",
+"取消",
 
 "Checking if had configuration on this wiki.":
-"<Translate Here>",
+"正在检查你在当前Wiki上存储的配置。",
 
 "Configurations for global Wikiplus.":
-"<Translate Here>",
+"Wikiplus的通用配置",
 
 "Confirm Import":
-"<Translate Here>",
+"确认导入",
 
 "Disallow":
-"<Translate Here>",
+"不允许",
 
 "Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?":
-"<Translate Here>",
+"你允许Wikiplus收集一些非敏感的信息来帮助改善和为当前Wiki:$1提供支持吗？",
 
 "Find a uploaded configuration of $1. Do you want to import this config now?":
-"<Translate Here>",
+"找到一个上传于$1的配置文件，是否立即导入？",
 
 "Install Wikiplus":
-"<Translate Here>",
+"Wikiplus安装",
 
 "Language":
-"<Translate Here>",
+"语言",
 
 "Load Config":
-"<Translate Here>",
+"载入设置",
 
 "Load Config from server":
-"<Translate Here>",
+"从服务器下载设置",
 
 "Loaded Modules":
-"<Translate Here>",
+"加载的模块",
 
 "No":
-"<Translate Here>",
+"否",
 
 "Save":
-"<Translate Here>",
+"保存",
 
 "Save config to Server failed.":
-"<Translate Here>",
+"上传配置失败。",
 
 "Save config to Server successfully.":
-"<Translate Here>",
+"上传配置成功。",
 
 "Save config to local successfully.":
-"<Translate Here>",
+"本地配置成功。",
 
 "Saved configuration on server is invaild.":
-"<Translate Here>",
+"服务器上的配置文件无效。",
 
 "Send Statistics":
-"<Translate Here>",
+"发送统计信息",
 
 "Test Run":
-"<Translate Here>",
+"测试运行",
 
 "Type comma-saparated module names here.":
-"<Translate Here>",
+"将需要加载的的模块名以逗号分隔填写在此：",
 
 "Wikiplus":
-"<Translate Here>",
+"Wikiplus",
 
 "Wikiplus Config":
-"<Translate Here>",
+"Wikiplus设置",
 
 "Wikiplus installed, enjoy it":
-"<Translate Here>",
+"Wikiplus已经安装，Enjoy it.",
 
 "Yes":
-"<Translate Here>",
+"是",
 
 "You could change Wikiplus settings here. These settings will work on the whole Wiki.":
-"<Translate Here>",
+"你可以在此处修改Wikiplus的设置，这将对整个Wiki都有效。",
 
 "Your configuration will save at User:$1/Wikiplus-config.json on this wiki.":
-"<Translate Here>",
+"你的配置文件将会存储在这个Wiki上的 User:$1/Wikiplus-config.json 页面中",
 
 "hit_abusefilter":
-"<Translate Here>"
+"触发防滥用过滤器"
 
     }
 }

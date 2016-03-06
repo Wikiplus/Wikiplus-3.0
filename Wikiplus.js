@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-03-04
+ * 2016-03-07
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -531,12 +531,14 @@ var Wikiplus = exports.Wikiplus = (function () {
         console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
         _util.Util.scopeConfigInit();
         _util.Util.loadCss(_version.Version.scriptURL + "/Wikiplus.css");
-        this.checkInstall();
     }
 
     _createClass(Wikiplus, [{
         key: 'start',
         value: function start() {
+            //检查更新
+            this.checkInstall();
+            //载入模块
             this.mmr = new _moduleManager.ModuleManager();
             this.loadCoreFunctions();
             this.notice.create.success((0, _i18n2.default)("Test Run"));
@@ -549,14 +551,22 @@ var Wikiplus = exports.Wikiplus = (function () {
             var self = this;
             var isInstall = this.coreConfig.isInstall;
             if (isInstall === "True") {
+                //加载并初始化i18n
+                var i18n = new _i18n.I18n(this.coreConfig.language);
+                i18n.initi18n();
                 //Updated Case
                 if (this.coreConfig.Version !== _version.Version.VERSION) {
                     this.notice.create.success("Wikiplus-3.0 v" + _version.Version.VERSION);
                     this.notice.create.success(_version.Version.releaseNote);
                     this.coreConfig.Version = _version.Version.VERSION;
+                    //检查语言更新
+                    i18n.load();
                 }
             } else {
                 (function () {
+                    //首次加载并初始化i18n（使用系统语言）
+                    var i18n = new _i18n.I18n(window.navigator.language.toLowerCase(), false);
+                    i18n.initi18n();
                     //安装
                     var install = function install() {
                         self.coreConfig.isInstall = 'True';
@@ -574,7 +584,7 @@ var Wikiplus = exports.Wikiplus = (function () {
                     }).catch(function (err) {
                         _ui.UI.createDialog({
                             title: (0, _i18n2.default)('Install Wikiplus'),
-                            info: (0, _i18n2.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
+                            info: (0, _i18n2.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').seti18n(mw.config.values.wgSiteName),
                             mode: [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }]
                         }).then(function (res) {
                             console.log("用户选择：" + (res ? "接受" : "拒绝"));
@@ -646,7 +656,7 @@ var CoreConfig = (function () {
                 modulesConfig = [];
             }
             var modulesInput = $('<textarea id="wikiplus-config-it-modules"></textarea>').val(modulesConfig.join(", "));
-            boxContent.append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n2.default)("Type comma \",\" saparated module names here.") + '</p>').append(modulesInput));
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n2.default)("Type comma-saparated module names here.") + '</p>').append(modulesInput));
 
             //从服务器恢复设置
             var loadConfigBtn = $('<input type="button" id="wikiplus-config-btn-loadconfig" value="' + (0, _i18n2.default)("Load Config") + '">');
@@ -835,23 +845,107 @@ CoreConfig.objectiveConfig = {
 };
 
 },{"./Wikipage":1,"./api":2,"./i18n":4,"./moduleManager":6,"./ui":8,"./util":9,"./version":10}],4:[function(require,module,exports){
-"use strict";
+'use strict';
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        * i18n for Wikiplus-3.0
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        */
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
+exports.I18n = undefined;
 exports.default = i18n;
-/**
- * i18n for Wikiplus-3.0
- */
-function i18n() {
-  var value = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
-  var scope = arguments.length <= 1 || arguments[1] === undefined ? "default" : arguments[1];
 
-  return value;
+var _util = require('./util');
+
+var _version = require('./version');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function i18n() {
+    var value = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+    var scope = arguments.length <= 1 || arguments[1] === undefined ? "default" : arguments[1];
+
+    var i18nData = window.Wikiplus.__i18nCache;
+
+    if (i18nData === undefined) {
+        return value;
+    } else {
+        var scopeKey = scope + "Scope";
+        var i18nScope = i18nData[scopeKey];
+        if (i18nScope === undefined) {
+            console.warn("i18n: 未知的Scope");
+            return value;
+        } else if (i18nScope[value] === undefined) {
+            console.debug("i18n: 找不到对应翻译", value, "@" + scope + "Scope");
+            return value;
+        } else {
+            return i18nScope[value];
+        }
+    }
 }
 
-},{}],5:[function(require,module,exports){
+var I18n = exports.I18n = (function () {
+    function I18n(lang) {
+        var async = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+        _classCallCheck(this, I18n);
+
+        this.lang = lang;
+        this.async = async;
+    }
+
+    _createClass(I18n, [{
+        key: 'initi18n',
+        value: function initi18n() {
+            var i18nCache = _util.Util.getLocalConfig("i18nCache", true);
+            if (i18nCache === undefined) {
+                this.load();
+                return;
+            } else if (i18nCache.language != this.lang) {
+                this.load();
+                return;
+            } else {
+                window.Wikiplus.__i18nCache = i18nCache;
+            }
+        }
+    }, {
+        key: 'load',
+        value: function load() {
+            var _this = this;
+
+            var ajaxConfig = {
+                url: _version.Version.scriptURL + '/backend/lang',
+                type: "GET",
+                data: {
+                    "lang": this.lang
+                },
+                dataType: "json",
+                success: function success(data) {
+                    if (data.language == _this.lang) {
+                        _util.Util.setLocalConfig("i18nCache", data, true);
+                        _this.initi18n();
+                    } else {
+                        console.warn("i18n: 似乎是载入了错误的语言文件。");
+                    }
+                },
+                error: function error() {
+                    console.warn("i18n: 找不到此语言对应的语言文件，");
+                }
+            };
+            if (!this.async) {
+                ajaxConfig.async = false;
+            }
+
+            $.ajax(ajaxConfig);
+        }
+    }]);
+
+    return I18n;
+})();
+
+},{"./util":9,"./version":10}],5:[function(require,module,exports){
 'use strict';
 
 var _core = require('./core');
@@ -1471,8 +1565,8 @@ var Version = exports.Version = function Version() {
 };
 
 ;
-Version.VERSION = "0.0.5";
-Version.releaseNote = "系统配置框测试。";
-Version.scriptURL = "https://127.0.0.1/";
+Version.VERSION = "0.0.7";
+Version.releaseNote = "i18n生成器的更新。";
+Version.scriptURL = "https://127.0.0.1"; //请不要以斜杠“/”结尾
 
 },{}]},{},[5]);

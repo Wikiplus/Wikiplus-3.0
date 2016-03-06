@@ -12,6 +12,14 @@ module.exports = function (grunt) {
         return res;
     }
 
+    function objLength(obj1) {
+        var len = 0;
+        for (var key in obj1) {
+            len++;
+        }
+        return len;
+    }
+
     var banner_tmpl = grunt.file.read('./banner.part');
 
     grunt.initConfig({
@@ -32,7 +40,7 @@ module.exports = function (grunt) {
                     'dist/i18n.js': 'src/i18n.js',
                     'dist/api.js': 'src/api.js',
                     'dist/moduleManager.js': 'src/moduleManager.js',
-                    'dist/Wikipage.js' : 'src/Wikipage.js'
+                    'dist/Wikipage.js': 'src/Wikipage.js'
                 }
             }
         },
@@ -213,39 +221,86 @@ module.exports = function (grunt) {
             Scopes[scope] = arrayunique(Scopes[scope]);
             scopeCount++;
         }
+        
         //生成
-        var languageDefaultContent = '{\n' +
-            '    "language": "default",\n' +
-            '    "update_time": "' + grunt.template.today("yyyy-mm-dd HH:MM:ss") + '",\n' +
-            '    "defaultScope": {\n\n';
-        for (var stri = 0; stri < defaultScope.length; stri++) {
-            languageDefaultContent += '"' + defaultScope[stri] + '":\n';
-            if (stri != defaultScope.length - 1) {
-                languageDefaultContent += '"<Translate Here>",\n\n';
-            } else {
-                languageDefaultContent += '"<Translate Here>"\n\n';
-            }
+        var languageDefaultContent = {};
+        languageDefaultContent.language = "default";
+        languageDefaultContent.update_time = grunt.template.today("yyyy-mm-dd HH:MM:ss");
+        languageDefaultContent.defaultScope = {};
+        for (var stri in defaultScope) {
+            languageDefaultContent.defaultScope[defaultScope[stri]] = "<Translate Here>";
         }
-        languageDefaultContent += '    },\n';
-        var processedScope = 0;
         for (var scope in Scopes) {
-            languageDefaultContent += '    "' + scope + 'Scope": {\n\n';
-            for (var strj = 0; strj < Scopes[scope].length; strj++) {
-                languageDefaultContent += '"' + Scopes[scope][strj] + '":\n';
-                if (strj != Scopes[scope].length - 1) {
-                    languageDefaultContent += '"<Translate Here>",\n\n';
-                } else {
-                    languageDefaultContent += '"<Translate Here>"\n\n';
+            var scopeTemp = {};
+            for (var strj in Scopes[scope]) {
+                scopeTemp[Scopes[scope][strj]] = "<Translate Here>";
+            }
+            languageDefaultContent[scope + "Scope"] = scopeTemp;
+        }
+        
+        //格式化工厂
+        function formatLanguageFile(languageContent) {
+            var formattedContent = '{\n' +
+                '    "language": "' + languageContent.language + '",\n' +
+                '    "update_time": "' + languageContent.update_time + '",\n';
+
+            var scopeLength = objLength(languageContent) - 2;
+            var scopeCount = 0;
+            for (var scopeName in languageContent) {
+                if (scopeName.substr(-5) == "Scope") {
+                    formattedContent += '    "' + scopeName + '": {\n\n';
+                    var thisScope = languageContent[scopeName];
+                    var thisScopeLength = objLength(thisScope);
+                    var stri = 0;
+                    for (var strKey in thisScope) {
+                        formattedContent += '"' + strKey + '":\n';
+                        if (stri != thisScopeLength - 1) {
+                            formattedContent += '"' + thisScope[strKey] + '",\n\n';
+                        } else {
+                            formattedContent += '"' + thisScope[strKey] + '"\n\n';
+                        }
+                        stri++;
+                    }
+                    if (scopeCount != scopeLength - 1) {
+                        formattedContent += '    },\n';
+                    } else {
+                        formattedContent += '    }\n';
+                    }
+                    scopeCount++;
                 }
             }
-            if (processedScope != scopeCount - 1) {
-                languageDefaultContent += "    },\n";
-            } else {
-                languageDefaultContent += "    }\n";
-            }
-        }
-        languageDefaultContent += "}";
+            formattedContent += "}";
 
-        grunt.file.write("backend/languages/default.json", languageDefaultContent);
+            return formattedContent;
+        }
+
+        grunt.log.subhead("开始写入语言文件：");
+        //扫描所有已存在的语言文件
+        grunt.file.recurse('./backend/languages/', function (abspath) {
+            var languageFileContent = grunt.file.read(abspath);
+            var languageContent = JSON.parse(languageFileContent);
+            var mergedContent = {};
+            mergedContent.language = languageContent.language;
+            mergedContent.update_time = grunt.template.today("yyyy-mm-dd HH:MM:ss");
+            for (var scope in languageDefaultContent) {
+                if (scope.substr(-5) == "Scope") {
+                    var thisScope = languageDefaultContent[scope];
+                    mergedContent[scope] = {};
+                    for (var str in thisScope) {
+                        var translatedStr = "<Translate Here>";
+                        if (languageContent[scope] != undefined && languageContent[scope][str] != undefined) {
+                            translatedStr = languageContent[scope][str];
+                        }
+                        mergedContent[scope][str] = translatedStr;
+                    }
+                }
+            }
+            grunt.file.write(abspath, formatLanguageFile(mergedContent));
+            grunt.log.writeln("更新文件：" + languageContent.language + ".json");
+        });
+        
+        //强制更新default
+        grunt.file.write("backend/languages/default.json", formatLanguageFile(languageDefaultContent));
+        grunt.log.ok("Done.");
     });
 }

@@ -10,6 +10,7 @@ import { ModuleManager } from './moduleManager'
 
 import { API } from './api'
 import { Wikipage } from './Wikipage'
+import { I18n } from './i18n'
 
 export class Wikiplus {
     //初始化
@@ -25,9 +26,11 @@ export class Wikiplus {
         console.log(`Wikiplus-3.0 v${Version.VERSION}`);
         Util.scopeConfigInit();
         Util.loadCss(Version.scriptURL + "/Wikiplus.css");
-        this.checkInstall();
     }
     start() {
+        //检查更新
+        this.checkInstall();
+        //载入模块
         this.mmr = new ModuleManager();
         this.loadCoreFunctions();
         this.notice.create.success(_("Test Run"));
@@ -36,13 +39,21 @@ export class Wikiplus {
         let self = this;
         let isInstall = this.coreConfig.isInstall;
         if (isInstall === "True") {
+            //加载并初始化i18n
+            let i18n = new I18n(this.coreConfig.language);
+            i18n.initi18n();
             //Updated Case
             if (this.coreConfig.Version !== Version.VERSION) {
                 this.notice.create.success("Wikiplus-3.0 v" + Version.VERSION);
                 this.notice.create.success(Version.releaseNote);
                 this.coreConfig.Version = Version.VERSION;
+                //检查语言更新
+                i18n.load();
             }
         } else {
+            //首次加载并初始化i18n（使用系统语言）
+            let i18n = new I18n(window.navigator.language.toLowerCase(), false);
+            i18n.initi18n();
             //安装
             let install = function () {
                 self.coreConfig.isInstall = 'True';
@@ -60,7 +71,7 @@ export class Wikiplus {
             }).catch(err=> {
                 UI.createDialog({
                     title: _('Install Wikiplus'),
-                    info: _('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').replace(/\$1/ig, mw.config.values.wgSiteName),
+                    info: _('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').seti18n(mw.config.values.wgSiteName),
                     mode: [
                         { id: "Yes", text: _("Yes"), res: true },
                         { id: "No", text: _("No"), res: false }
@@ -120,7 +131,7 @@ class CoreConfig {
         let modulesInput = $(`<textarea id="wikiplus-config-it-modules"></textarea>`)
             .val(modulesConfig.join(", "));
         boxContent.append(
-            $(`<p><b>${_("Loaded Modules") }</b>:<br>${_("Type comma \",\" saparated module names here.") }</p>`)
+            $(`<p><b>${_("Loaded Modules") }</b>:<br>${_("Type comma-saparated module names here.") }</p>`)
                 .append(modulesInput)
             );
         
