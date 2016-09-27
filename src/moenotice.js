@@ -2,8 +2,9 @@
  * MoeNotification mini
  */
 export function MoeNotification() {
-    var self = this;
-    this.display = function (text = '喵', type = 'success', callback = () => { }) {
+    let self = this;
+    this.display = function (text = '喵', type = 'success', callback = () => {
+    }) {
         $("#MoeNotification").append(
             $("<div>").addClass('MoeNotification-notice')
                 .addClass('MoeNotification-notice-' + type)
@@ -11,19 +12,22 @@ export function MoeNotification() {
                     $('<span>').text(text)
                 )
                 .fadeIn(300)
-            );
+        );
         self.bind();
         self.clear();
         callback($("#MoeNotification").find('.MoeNotification-notice').last());
-    }
+    };
     this.create = {
-        success: function (text, callback = () => { }) {
+        success: function (text, callback = () => {
+        }) {
             self.display(text, 'success', callback);
         },
-        warning: function (text, callback = () => { }) {
+        warning: function (text, callback = () => {
+        }) {
             self.display(text, 'warning', callback);
         },
-        error: function (text, callback = () => { }) {
+        error: function (text, callback = () => {
+        }) {
             self.display(text, 'error', callback);
         }
     };
@@ -37,7 +41,7 @@ export function MoeNotification() {
         else {
             return false;
         }
-    }
+    };
     this.empty = function (f) {
         $(".MoeNotification-notice").each(function (i) {
             if ($.isFunction(f)) {
@@ -52,12 +56,12 @@ export function MoeNotification() {
                 })
             }
         })
-    }
+    };
     this.bind = function () {
         $(".MoeNotification-notice").mouseover(function () {
             self.slideLeft($(this));
         });
-    }
+    };
     window.slideLeft = this.slideLeft = function (object, speed) {
         object.css('position', 'relative');
         object.animate({
@@ -68,12 +72,12 @@ export function MoeNotification() {
                     $(this).remove();
                 });
             });
-    }
+    };
     this.init = function () {
         $("body").append(
-            $('<div>').attr('id','MoeNotification')
+            $('<div>').attr('id', 'MoeNotification')
         );
-    }
+    };
     if (!($("#MoeNotification").length > 0)) {
         this.init();
     }

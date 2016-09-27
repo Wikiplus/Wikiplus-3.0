@@ -12,6 +12,7 @@ export class Util {
         })
         $("head").append(cssNode);
     }
+
     //Load js (jQuery required)
     static loadJs(path) {
         var jsnode = document.createElement('script');
@@ -22,6 +23,7 @@ export class Util {
         })
         $("head").append(jsnode);
     }
+
     //save local config
     static setLocalConfig(key, value = "", isObj = false) {
         key = "Wikiplus-" + key;
@@ -31,9 +33,10 @@ export class Util {
             localStorage[key] = value;
         }
     }
+
     //get local config
     static getLocalConfig(key, isObj = false) {
-        try{
+        try {
             key = "Wikiplus-" + key;
             if (isObj) {
                 return JSON.parse(localStorage[key]);
@@ -41,10 +44,11 @@ export class Util {
                 return localStorage[key];
             }
         }
-        catch(e){
+        catch (e) {
             return undefined;
         }
     }
+
     //Run once at Wikiplus init.
     static scopeConfigInit() {
         String.prototype.seti18n = function () {

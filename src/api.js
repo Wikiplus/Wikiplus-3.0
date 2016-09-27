@@ -1,8 +1,8 @@
 /**
- * Mediawiki API Wrapper
+ * MediaWiki API Wrapper
  */
 import _ from './i18n'
-import { Version } from './version'
+import {Version} from './version'
 
 export class API {
     /**
@@ -12,10 +12,11 @@ export class API {
     static getAPIURL() {
         return `${location.protocol}//${location.host}${window.mw.config.values.wgScriptPath}/api.php`;
     }
-	/**
-	 * 返回当前页页面名。
+
+    /**
+     * 返回当前页页面名。
      * @return {string} pageName 页面标题
-	 */
+     */
     static getThisPageName() {
         let pageName = window.mw.config.values.wgPageName;
         if (pageName === undefined) {
@@ -25,6 +26,7 @@ export class API {
             return pageName;
         }
     }
+
     /**
      * 返回当前的用户名
      * @return {string} username 当前登录用户名
@@ -38,6 +40,7 @@ export class API {
             return getUserid();
         }
     }
+
     /**
      * 返回编辑令牌
      * @return Promise
@@ -73,6 +76,7 @@ export class API {
             }
         })
     }
+
     /**
      * 获取编辑起始时间戳
      * @param {string} title 页面标题
@@ -135,6 +139,7 @@ export class API {
             })
         })
     }
+
     /**
      * 页面编辑
      * @param {object} config
@@ -183,9 +188,10 @@ export class API {
             })
         })
     }
+
     /**
      * 编辑段落
-     * @param {object} config 
+     * @param {object} config
      */
     static editSection(config) {
         return this.edit({
@@ -199,6 +205,7 @@ export class API {
             }
         });
     }
+
     /**
      * 重定向至
      * @param {string} target 目标页面
@@ -228,6 +235,7 @@ export class API {
             "summary": _(`Redirect [[${origin}]] to [[${window.mw.config.values.wgPageName}]] via Wikiplus`)
         }, config));
     }
+
     /**
      * 获取页面WikiText
      * @param {string} title 页面名
@@ -259,7 +267,7 @@ export class API {
             })
         })
     }
-    
+
     /**
      * 解析WikiText
      * @param {string} wikitext

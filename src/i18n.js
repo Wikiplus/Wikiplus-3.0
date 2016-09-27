@@ -1,8 +1,8 @@
 /**
  * i18n for Wikiplus-3.0
  */
-import { Util } from './util'
-import { Version } from './version'
+import {Util} from './util'
+import {Version} from './version'
 
 export default function i18n(value = "", scope = "default") {
     let i18nData = window.Wikiplus.__i18nCache;
@@ -29,6 +29,7 @@ export class I18n {
         this.lang = lang;
         this.async = async;
     }
+
     initi18n() {
         let i18nCache = Util.getLocalConfig("i18nCache", true);
         if (i18nCache === undefined) {
@@ -41,6 +42,7 @@ export class I18n {
             window.Wikiplus.__i18nCache = i18nCache;
         }
     }
+
     load() {
         let ajaxConfig = {
             url: `${Version.scriptURL}/backend/lang`,
