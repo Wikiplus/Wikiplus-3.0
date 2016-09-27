@@ -2,7 +2,7 @@
  * Wikipage
  * MediaWiki Front-end SDK
  */
-import {API} from './api'
+import { API } from './api'
 export class Wikipage {
     /**
      * 构造函数
