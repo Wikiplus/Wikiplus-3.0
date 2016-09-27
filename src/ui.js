@@ -13,36 +13,37 @@ export class UI {
      * @param {function} option.callback 回调函数，用户在点击链接后运行。
      */
     static addLinkInToolbox(option) {
-        if(option == undefined){
+        if (option == undefined) {
             throw Error("need options for parameter.");
         }
-        
+
         let name = option.name || _('Blank link');
         let link = option.link || 'javascript:;';
         let title = option.title || name;
         let id = option.id || 't-wikiplus-tblink' + (new Date().getTime());
         let callback = option.callback || new Function();
 
-        let eleNode = $("<li>").attr({ "id": id }).append($("<a>").attr({ "href": link, "title": title }).html(name));
+        let eleNode = $("<li>").attr({"id": id}).append($("<a>").attr({"href": link, "title": title}).html(name));
         $("#p-tb>div>ul").append(eleNode);
         eleNode.on("click", function (event) {
             callback(event);
         })
     }
-	/**
-	 * 建立对话框
-	 * @param {String} option.info 信息
-	 * @param {String} option.title = "Wikiplus" 标题栏
-	 * @param {Object} option.mode 按钮标题和它的返回值，默认值如下
-	 * mode: [
-	 *     {id: "Yes", text: _("Yes"), res: true}, 
-	 *     {id: "No", text: _("No"), res: false}, 
-	 * ]
-	 */
+
+    /**
+     * 建立对话框
+     * @param {String} option.info 信息
+     * @param {String} option.title = "Wikiplus" 标题栏
+     * @param {Object} option.mode 按钮标题和它的返回值，默认值如下
+     * mode: [
+     *     {id: "Yes", text: _("Yes"), res: true},
+     *     {id: "No", text: _("No"), res: false},
+     * ]
+     */
     static createDialog(option) {
         let info = option.info || '';
         let title = option.title || _('Wikiplus');
-        let mode = option.mode || [{ id: "Yes", text: _("Yes"), res: true }, { id: "No", text: _("No"), res: false }, ];
+        let mode = option.mode || [{id: "Yes", text: _("Yes"), res: true}, {id: "No", text: _("No"), res: false},];
 
         return new Promise((resolve, reject) => {
             let notice = $('<div>').text(info).attr('id', 'Wikiplus-InterBox-Content');
@@ -70,30 +71,30 @@ export class UI {
             });
         });
     }
-	
-	/**
-	 * 关闭Wikiplus弹出框
-	 */
+
+    /**
+     * 关闭Wikiplus弹出框
+     */
     static closeBox() {
         $('.Wikiplus-InterBox').fadeOut('fast', function () {
             $(this).remove();
         })
     }
-	
-	
-	/**
-	 * 画框
-	 * @param {String} option.title 标题
-	 * @param {HTML} option.content 内容
-	 * @param {Integer} option.width = 600 宽度，单位为px
-	 * @param {function()} option.callback 回调函数
-	 */
+
+
+    /**
+     * 画框
+     * @param {String} option.title 标题
+     * @param {HTML} option.content 内容
+     * @param {Integer} option.width = 600 宽度，单位为px
+     * @param {function()} option.callback 回调函数
+     */
     static createBox(option) {
         let title = option.title || _("Wikiplus");
         let content = option.content || "";
         let width = option.width || 600;
         let callback = option.callback || new Function();
-	
+
         //检查是否已存在
         if ($('.Wikiplus-InterBox').length > 0) {
             $('.Wikiplus-InterBox').each(function () {
@@ -112,14 +113,14 @@ export class UI {
             .append(
                 $('<div>').addClass('Wikiplus-InterBox-Header')
                     .html(title)
-                )
+            )
             .append(
                 $('<div>').addClass('Wikiplus-InterBox-Content')
                     .append(content)
-                )
+            )
             .append(
                 $('<span>').text('×').addClass('Wikiplus-InterBox-Close')
-                )
+            )
         $('body').append(diglogBox);
         $('.Wikiplus-InterBox').width(width + 'px');
         $('.Wikiplus-InterBox-Close').click(function () {

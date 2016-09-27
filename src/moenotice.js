@@ -3,7 +3,8 @@
  */
 export function MoeNotification() {
     var self = this;
-    this.display = function (text = '喵', type = 'success', callback = () => { }) {
+    this.display = function (text = '喵', type = 'success', callback = () => {
+    }) {
         $("#MoeNotification").append(
             $("<div>").addClass('MoeNotification-notice')
                 .addClass('MoeNotification-notice-' + type)
@@ -11,19 +12,22 @@ export function MoeNotification() {
                     $('<span>').text(text)
                 )
                 .fadeIn(300)
-            );
+        );
         self.bind();
         self.clear();
         callback($("#MoeNotification").find('.MoeNotification-notice').last());
     }
     this.create = {
-        success: function (text, callback = () => { }) {
+        success: function (text, callback = () => {
+        }) {
             self.display(text, 'success', callback);
         },
-        warning: function (text, callback = () => { }) {
+        warning: function (text, callback = () => {
+        }) {
             self.display(text, 'warning', callback);
         },
-        error: function (text, callback = () => { }) {
+        error: function (text, callback = () => {
+        }) {
             self.display(text, 'error', callback);
         }
     };
@@ -71,7 +75,7 @@ export function MoeNotification() {
     }
     this.init = function () {
         $("body").append(
-            $('<div>').attr('id','MoeNotification')
+            $('<div>').attr('id', 'MoeNotification')
         );
     }
     if (!($("#MoeNotification").length > 0)) {
