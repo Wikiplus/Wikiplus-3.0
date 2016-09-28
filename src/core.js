@@ -154,23 +154,57 @@ export class Wikiplus {
                 }
             });
         }
+
+        this.bindQuickEditEvents();
     }
 
     /**
      * 绑定QuickEdit入口事件
      */
     bindQuickEditEvents(){
+        let self = this;
         $('.Wikiplus-QuickEdit-Entrance').click(function(){
-
+            self.generateQuickEditUI({
+                "editSettings": $(this).data()
+            });
         })
     }
 
     /**
-     * 绘制编辑UI
+     * 向页面插入Wikiplus快速编辑界面
      */
-    drawQuickEditUI(){
+    generateQuickEditUI(options = {}){
+        let title = options.title || _('QuickEdit');
+        let summary = options.summary || _('default_summary');
 
+        let backBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Back').addClass('Wikiplus-Btn').text(`${_('back')}`);//返回按钮
+        let jumpBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Jump').addClass('Wikiplus-Btn').append(
+            $('<a>').attr('href', '#Wikiplus-Quickedit').text(`${_('goto_editbox')}`)
+        );//到编辑框
+        let inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit');//主编辑框
+        let previewBox = $('<div>').attr('id', 'Wikiplus-Quickedit-Preview-Output');//预览输出
+        let summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', `${_('summary_placehold')}`).val(summary);//编辑摘要输入
+        let editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text(`${_('submit')}(Ctrl+S)`);//提交按钮
+        let previewSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Preview-Submit').text(`${_('preview')}`);//预览按钮
+        let isMinorEdit = $('<div>').append(
+            $('<input>').attr({ 'type': 'checkbox', 'id': 'Wikiplus-Quickedit-MinorEdit' })
+        )
+            .append(
+                $('<label>').attr('for', 'Wikiplus-Quickedit-MinorEdit').text(`${_('mark_minoredit')}(Ctrl+Shift+S)`)
+            )
+            .css({ 'margin': '5px 5px 5px -3px', 'display': 'inline' });
+        //DOM定义结束
+        let editBody = $('<div>').append(backBtn, jumpBtn, previewBox, inputBox, summaryBox, $('<br>'), isMinorEdit, editSubmitBtn, previewSubmitBtn);
+
+        this.UI.createBox({
+            "title": title,
+            "content": editBody,
+            "width": 1000,
+            "callback": ()=>{
+            }
+        })
     }
+
 
     loadCoreFunctions() {
         this.coreConfig.init();
@@ -279,7 +313,7 @@ class CoreConfig {
     }
 
     saveConfigToLocal(config) {
-        for (let confKey in config) {
+        for (let confKey of config) {
             if (CoreConfig.objectiveConfig[confKey]) {
                 Util.setLocalConfig(confKey, config[confKey], true);
             } else {

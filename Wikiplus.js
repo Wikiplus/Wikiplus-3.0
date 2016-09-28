@@ -675,6 +675,8 @@ var Wikiplus = exports.Wikiplus = function () {
                     }
                 });
             }
+
+            this.bindQuickEditEvents();
         }
 
         /**
@@ -684,16 +686,44 @@ var Wikiplus = exports.Wikiplus = function () {
     }, {
         key: 'bindQuickEditEvents',
         value: function bindQuickEditEvents() {
-            $('.Wikiplus-QuickEdit-Entrance').click(function () {});
+            var self = this;
+            $('.Wikiplus-QuickEdit-Entrance').click(function () {
+                self.generateQuickEditUI({
+                    "editSettings": $(this).data()
+                });
+            });
         }
 
         /**
-         * 绘制编辑UI
+         * 向页面插入Wikiplus快速编辑界面
          */
 
     }, {
-        key: 'drawQuickEditUI',
-        value: function drawQuickEditUI() {}
+        key: 'generateQuickEditUI',
+        value: function generateQuickEditUI() {
+            var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var title = options.title || (0, _i18n2.default)('QuickEdit');
+            var summary = options.summary || (0, _i18n2.default)('default_summary');
+
+            var backBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Back').addClass('Wikiplus-Btn').text('' + (0, _i18n2.default)('back')); //返回按钮
+            var jumpBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Jump').addClass('Wikiplus-Btn').append($('<a>').attr('href', '#Wikiplus-Quickedit').text('' + (0, _i18n2.default)('goto_editbox'))); //到编辑框
+            var inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit'); //主编辑框
+            var previewBox = $('<div>').attr('id', 'Wikiplus-Quickedit-Preview-Output'); //预览输出
+            var summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', '' + (0, _i18n2.default)('summary_placehold')).val(summary); //编辑摘要输入
+            var editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text((0, _i18n2.default)('submit') + '(Ctrl+S)'); //提交按钮
+            var previewSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Preview-Submit').text('' + (0, _i18n2.default)('preview')); //预览按钮
+            var isMinorEdit = $('<div>').append($('<input>').attr({ 'type': 'checkbox', 'id': 'Wikiplus-Quickedit-MinorEdit' })).append($('<label>').attr('for', 'Wikiplus-Quickedit-MinorEdit').text((0, _i18n2.default)('mark_minoredit') + '(Ctrl+Shift+S)')).css({ 'margin': '5px 5px 5px -3px', 'display': 'inline' });
+            //DOM定义结束
+            var editBody = $('<div>').append(backBtn, jumpBtn, previewBox, inputBox, summaryBox, $('<br>'), isMinorEdit, editSubmitBtn, previewSubmitBtn);
+
+            this.UI.createBox({
+                "title": title,
+                "content": editBody,
+                "width": 1000,
+                "callback": function callback() {}
+            });
+        }
     }, {
         key: 'loadCoreFunctions',
         value: function loadCoreFunctions() {
@@ -813,13 +843,35 @@ var CoreConfig = function () {
     }, {
         key: 'saveConfigToLocal',
         value: function saveConfigToLocal(config) {
-            for (var confKey in config) {
-                if (CoreConfig.objectiveConfig[confKey]) {
-                    _util.Util.setLocalConfig(confKey, config[confKey], true);
-                } else {
-                    _util.Util.setLocalConfig(confKey, config[confKey], false);
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = config[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var confKey = _step.value;
+
+                    if (CoreConfig.objectiveConfig[confKey]) {
+                        _util.Util.setLocalConfig(confKey, config[confKey], true);
+                    } else {
+                        _util.Util.setLocalConfig(confKey, config[confKey], false);
+                    }
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
                 }
             }
+
             this.notice.create.success((0, _i18n2.default)("Save config to local successfully."));
         }
     }, {
@@ -1005,10 +1057,8 @@ var I18n = exports.I18n = function () {
             var i18nCache = _util.Util.getLocalConfig("i18nCache", true);
             if (i18nCache === undefined) {
                 this.load();
-                return;
             } else if (i18nCache.language != this.lang) {
                 this.load();
-                return;
             } else {
                 window.Wikiplus.__i18nCache = i18nCache;
             }
@@ -1719,7 +1769,7 @@ var Version = exports.Version = function Version() {
   _classCallCheck(this, Version);
 };
 
-Version.VERSION = "0.0.7";
+Version.VERSION = "0.0.8";
 Version.releaseNote = "i18n生成器的更新。";
 Version.scriptURL = "https://localhost/Wikiplus-3.0"; //请不要以斜杠“/”结尾
 

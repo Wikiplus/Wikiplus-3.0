@@ -34,10 +34,8 @@ export class I18n {
         let i18nCache = Util.getLocalConfig("i18nCache", true);
         if (i18nCache === undefined) {
             this.load();
-            return;
         } else if (i18nCache.language != this.lang) {
             this.load();
-            return;
         } else {
             window.Wikiplus.__i18nCache = i18nCache;
         }

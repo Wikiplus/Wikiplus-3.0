@@ -1,6 +1,6 @@
 {
     "language": "default",
-    "update_time": "2016-09-28 14:06:08",
+    "update_time": "2016-09-28 19:28:43",
     "defaultScope": {
 
 "Allow":
@@ -96,7 +96,28 @@
 "Your configuration will save at User:$1/Wikiplus-config.json on this wiki.":
 "<Translate Here>",
 
+"back":
+"<Translate Here>",
+
+"default_summary":
+"<Translate Here>",
+
+"goto_editbox":
+"<Translate Here>",
+
 "hit_abusefilter":
+"<Translate Here>",
+
+"mark_minoredit":
+"<Translate Here>",
+
+"preview":
+"<Translate Here>",
+
+"submit":
+"<Translate Here>",
+
+"summary_placehold":
 "<Translate Here>"
 
     }

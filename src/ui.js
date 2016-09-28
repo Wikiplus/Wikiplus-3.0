@@ -120,7 +120,7 @@ export class UI {
             )
             .append(
                 $('<span>').text('×').addClass('Wikiplus-InterBox-Close')
-            )
+            );
         $('body').append(diglogBox);
         $('.Wikiplus-InterBox').width(width + 'px');
         $('.Wikiplus-InterBox-Close').click(function () {
@@ -149,7 +149,7 @@ export class UI {
                     bindDragging(element);
                 })
             });
-        }
+        };
         bindDragging($('.Wikiplus-InterBox-Header'));
         $('.Wikiplus-InterBox').fadeIn(500);
         callback();

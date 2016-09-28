@@ -1,6 +1,6 @@
 {
     "language": "zh-cn",
-    "update_time": "2016-09-28 14:06:08",
+    "update_time": "2016-09-28 19:28:43",
     "defaultScope": {
 
 "Allow":
@@ -96,8 +96,29 @@
 "Your configuration will save at User:$1/Wikiplus-config.json on this wiki.":
 "你的配置文件将会存储在这个Wiki上的 User:$1/Wikiplus-config.json 页面中",
 
+"back":
+"返回",
+
+"default_summary":
+" // Edit via Wikiplus",
+
+"goto_editbox":
+"至编辑框",
+
 "hit_abusefilter":
-"触发防滥用过滤器"
+"触发防滥用过滤器",
+
+"mark_minoredit":
+"编辑为小编辑",
+
+"preview":
+"预览",
+
+"submit":
+"提交",
+
+"summary_placehold":
+"编辑摘要"
 
     }
 }
