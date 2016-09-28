@@ -17,6 +17,8 @@ export class Wikipage {
         }).catch((e) => {
             console.error('获取页面基础信息失败：', e);
         });
+        this.wikiTextCache = {}; // WikiText缓存
+        this.lastestRevision = window.mw.config.values.wgCurRevisionId;
     }
 
     /**
@@ -41,19 +43,16 @@ export class Wikipage {
 
     /**
      * 修改本页面内容
-     * @param {string} content 新的页面内容
-     * @param {string} summary 编辑摘要
      */
-    setContent(content, summary) {
+    setContent(content, config = {}) {
         return new Promise((res, rej) => {
             this.info = this.info.then(() => {
-                API.edit({
+                API.edit($.extend({
                     "title": this.title,
                     "editToken": this.editToken,
                     "timeStamp": this.timeStamp,
-                    "content": content,
-                    "summary": summary
-                }).then(data=> {
+                    "content": content
+                }, config)).then(data=> {
                     res(data);
                 });
             });
@@ -62,17 +61,20 @@ export class Wikipage {
 
     /**
      * 获得当前页面的WikiText
+     * @param section
      * @param {string} revision (可选)修订版本
      */
-    getWikiText(revision) {
+    getWikiText(section = 'page', revision = this.lastestRevision) {
+        // page是一个不合法的参数值 但是MediaWiki会忽略不合法的参数值 等价于获取全页
         return new Promise((res, rej) => {
-            this.info = this.info.then(() => {
-                API.getWikiText(this.title, revision).then(data => {
-                    res(data);
-                }).catch(err => {
-                    rej(err);
-                });
-            });
+            if (this.wikiTextCache[`${revision}.${section}`]){
+                res(this.wikiTextCache[`${revision}.${section}`])
+            }
+            else{
+                this.info = this.info.then(()=>{
+                    API.getWikiText(this.title, section, revision).then(res).catch(rej);
+                })
+            }
         });
     }
 }

@@ -1,6 +1,6 @@
 {
     "language": "default",
-    "update_time": "2016-03-07 01:45:01",
+    "update_time": "2016-09-28 14:06:08",
     "defaultScope": {
 
 "Allow":
@@ -49,6 +49,9 @@
 "<Translate Here>",
 
 "No":
+"<Translate Here>",
+
+"QuickEdit":
 "<Translate Here>",
 
 "Save":

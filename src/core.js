@@ -11,6 +11,7 @@ import {ModuleManager} from './moduleManager'
 import {API} from './api'
 import {Wikipage} from './Wikipage'
 import {I18n} from './i18n'
+import {Log} from './log'
 
 export class Wikiplus {
     //初始化
@@ -22,6 +23,7 @@ export class Wikiplus {
         this.API = API;
         this.Wikipage = Wikipage;
         this.coreConfig = new CoreConfig(this.notice);
+        this.Log = new Log();
 
         console.log(`Wikiplus-3.0 v${Version.VERSION}`);
         Util.scopeConfigInit();
@@ -87,8 +89,92 @@ export class Wikiplus {
         }
     }
 
+    /**
+     * 初始化快速编辑
+     */
+    initQuickEdit(){
+        // 分析网页链接
+        if (!(mw.config.values.wgIsArticle && mw.config.values.wgAction === "view" && mw.config.values.wgIsProbablyEditable)) {
+            console.log('该页面无法编辑 快速编辑界面加载终止');
+            return false;
+        }
+        this.generateQuickEditButtons();
+    }
+
+    /**
+     * 生成快速编辑按钮
+     */
+    generateQuickEditButtons(){
+        // 顶部按钮
+        let self = this;
+        let topBtn = $('<li>').attr('id', 'Wikiplus-Edit-TopBtn').append(
+            $('<span>').append(
+                $('<a>').attr('href', 'javascript:void(0)').text(`${_('QuickEdit')}`)
+            )
+        ).data({
+            sectionNumber: -1,
+            target: this.API.getThisPageName(),
+        }).addClass('Wikiplus-QuickEdit-Entrance');
+
+        if ($('#ca-edit').length > 0 && $('#Wikiplus-Edit-TopBtn').length == 0) {
+            $('#ca-edit').before(topBtn);
+        }
+
+        // 段落按钮
+        if ($('.mw-editsection').length > 0) {
+            //段落快速编辑按钮
+            var sectionBtn = $('<span>').append(
+                $('<span>').attr('id', 'mw-editsection-bracket').text('[')
+            ).append(
+                $('<a>').addClass('Wikiplus-Edit-SectionBtn').attr('href', 'javascript:void(0)').text(_('QuickEdit'))
+            ).append(
+                $('<span>').attr('id', 'mw-editsection-bracket').text(']')
+            );
+            $('.mw-editsection').each(function (i) {
+                try {
+                    let editURL = $(this).find("a").last().attr('href');
+                    // Attention: RegExp Magic. DO NOT MODIFY UNLESS YOU HAVE THOUGHT CAREFULLY.
+                    // 注意：此处的正则表达式经过了长期的实践检验，请不要轻易更改除非你已经深思熟虑。
+                    let sectionNumber = editURL.match(/&[ve]*section\=([^&]+)/)[1].replace(/T-/ig, '');
+                    let sectionTargetName = decodeURI(editURL.match(/title=(.+?)&/)[1]);
+
+                    let cloneNode = $(this).prev().clone();
+                    cloneNode.find('.mw-headline-number').remove();
+                    let sectionName = $.trim(cloneNode.text());
+                    let _sectionBtn = sectionBtn.clone();
+                    _sectionBtn.find('.Wikiplus-Edit-SectionBtn').data({
+                        sectionNumber: sectionNumber,
+                        sectionName: sectionName,
+                        target: sectionTargetName
+                    }).addClass('Wikiplus-QuickEdit-Entrance');
+                    $(this).append(_sectionBtn);
+                }
+                catch (e) {
+                    self.Log.error('fail_to_init_quickedit');
+                }
+            });
+        }
+    }
+
+    /**
+     * 绑定QuickEdit入口事件
+     */
+    bindQuickEditEvents(){
+        $('.Wikiplus-QuickEdit-Entrance').click(function(){
+
+        })
+    }
+
+    /**
+     * 绘制编辑UI
+     */
+    drawQuickEditUI(){
+
+    }
+
     loadCoreFunctions() {
         this.coreConfig.init();
+        this.initQuickEdit();
     }
 }
 
@@ -184,7 +270,7 @@ class CoreConfig {
         config["updatetime"] = (new Date()).getTime();
         let configString = JSON.stringify(config);
         let configPage = new Wikipage(`User:${API.getUsername() }/Wikiplus-config.json`);
-        configPage.setContent(configString, "Update Config via Wikiplus").then(data=> {
+        configPage.setContent({content: configString, summary: "Update Config via Wikiplus"}).then(data=> {
             this.notice.create.success(_("Save config to Server successfully."));
             UI.closeBox();
         }).catch(e=> {

@@ -40,7 +40,8 @@ module.exports = function (grunt) {
                     'dist/i18n.js': 'src/i18n.js',
                     'dist/api.js': 'src/api.js',
                     'dist/moduleManager.js': 'src/moduleManager.js',
-                    'dist/Wikipage.js': 'src/Wikipage.js'
+                    'dist/Wikipage.js': 'src/Wikipage.js',
+                    'dist/log.js': 'src/log.js'
                 }
             }
         },

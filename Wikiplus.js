@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-09-27
+ * 2016-09-28
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -50,6 +50,8 @@ var Wikipage = exports.Wikipage = function () {
         }).catch(function (e) {
             console.error('获取页面基础信息失败：', e);
         });
+        this.wikiTextCache = {}; // WikiText缓存
+        this.lastestRevision = window.mw.config.values.wgCurRevisionId;
     }
 
     /**
@@ -85,24 +87,23 @@ var Wikipage = exports.Wikipage = function () {
 
         /**
          * 修改本页面内容
-         * @param {string} content 新的页面内容
-         * @param {string} summary 编辑摘要
          */
 
     }, {
         key: 'setContent',
-        value: function setContent(content, summary) {
+        value: function setContent(content) {
             var _this4 = this;
+
+            var config = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
             return new Promise(function (res, rej) {
                 _this4.info = _this4.info.then(function () {
-                    _api.API.edit({
+                    _api.API.edit($.extend({
                         "title": _this4.title,
                         "editToken": _this4.editToken,
                         "timeStamp": _this4.timeStamp,
-                        "content": content,
-                        "summary": summary
-                    }).then(function (data) {
+                        "content": content
+                    }, config)).then(function (data) {
                         res(data);
                     });
                 });
@@ -111,22 +112,27 @@ var Wikipage = exports.Wikipage = function () {
 
         /**
          * 获得当前页面的WikiText
+         * @param section
          * @param {string} revision (可选)修订版本
          */
 
     }, {
         key: 'getWikiText',
-        value: function getWikiText(revision) {
+        value: function getWikiText() {
             var _this5 = this;
 
+            var section = arguments.length <= 0 || arguments[0] === undefined ? 'page' : arguments[0];
+            var revision = arguments.length <= 1 || arguments[1] === undefined ? this.lastestRevision : arguments[1];
+
+            // page是一个不合法的参数值 但是MediaWiki会忽略不合法的参数值 等价于获取全页
             return new Promise(function (res, rej) {
-                _this5.info = _this5.info.then(function () {
-                    _api.API.getWikiText(_this5.title, revision).then(function (data) {
-                        res(data);
-                    }).catch(function (err) {
-                        rej(err);
+                if (_this5.wikiTextCache[revision + '.' + section]) {
+                    res(_this5.wikiTextCache[revision + '.' + section]);
+                } else {
+                    _this5.info = _this5.info.then(function () {
+                        _api.API.getWikiText(_this5.title, section, revision).then(res).catch(rej);
                     });
-                });
+                }
             });
         }
     }]);
@@ -491,7 +497,7 @@ var API = exports.API = function () {
     return API;
 }();
 
-},{"./i18n":4,"./version":10}],3:[function(require,module,exports){
+},{"./i18n":4,"./version":11}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -521,6 +527,8 @@ var _api = require('./api');
 
 var _Wikipage = require('./Wikipage');
 
+var _log = require('./log');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -537,6 +545,7 @@ var Wikiplus = exports.Wikiplus = function () {
         this.API = _api.API;
         this.Wikipage = _Wikipage.Wikipage;
         this.coreConfig = new CoreConfig(this.notice);
+        this.Log = new _log.Log();
 
         console.log('Wikiplus-3.0 v' + _version.Version.VERSION);
         _util.Util.scopeConfigInit();
@@ -605,10 +614,91 @@ var Wikiplus = exports.Wikiplus = function () {
                 })();
             }
         }
+
+        /**
+         * 初始化快速编辑
+         */
+
+    }, {
+        key: 'initQuickEdit',
+        value: function initQuickEdit() {
+            // 分析网页链接
+            if (!(mw.config.values.wgIsArticle && mw.config.values.wgAction === "view" && mw.config.values.wgIsProbablyEditable)) {
+                console.log('该页面无法编辑 快速编辑界面加载终止');
+                return false;
+            }
+            this.generateQuickEditButtons();
+        }
+
+        /**
+         * 生成快速编辑按钮
+         */
+
+    }, {
+        key: 'generateQuickEditButtons',
+        value: function generateQuickEditButtons() {
+            // 顶部按钮
+            var self = this;
+            var topBtn = $('<li>').attr('id', 'Wikiplus-Edit-TopBtn').append($('<span>').append($('<a>').attr('href', 'javascript:void(0)').text('' + (0, _i18n2.default)('QuickEdit')))).data({
+                sectionNumber: -1,
+                target: this.API.getThisPageName()
+            }).addClass('Wikiplus-QuickEdit-Entrance');
+
+            if ($('#ca-edit').length > 0 && $('#Wikiplus-Edit-TopBtn').length == 0) {
+                $('#ca-edit').before(topBtn);
+            }
+
+            // 段落按钮
+            if ($('.mw-editsection').length > 0) {
+                //段落快速编辑按钮
+                var sectionBtn = $('<span>').append($('<span>').attr('id', 'mw-editsection-bracket').text('[')).append($('<a>').addClass('Wikiplus-Edit-SectionBtn').attr('href', 'javascript:void(0)').text((0, _i18n2.default)('QuickEdit'))).append($('<span>').attr('id', 'mw-editsection-bracket').text(']'));
+                $('.mw-editsection').each(function (i) {
+                    try {
+                        var editURL = $(this).find("a").last().attr('href');
+                        // Attention: RegExp Magic. DO NOT MODIFY UNLESS YOU HAVE THOUGHT CAREFULLY.
+                        // 注意：此处的正则表达式经过了长期的实践检验，请不要轻易更改除非你已经深思熟虑。
+                        var sectionNumber = editURL.match(/&[ve]*section\=([^&]+)/)[1].replace(/T-/ig, '');
+                        var sectionTargetName = decodeURI(editURL.match(/title=(.+?)&/)[1]);
+
+                        var cloneNode = $(this).prev().clone();
+                        cloneNode.find('.mw-headline-number').remove();
+                        var sectionName = $.trim(cloneNode.text());
+                        var _sectionBtn = sectionBtn.clone();
+                        _sectionBtn.find('.Wikiplus-Edit-SectionBtn').data({
+                            sectionNumber: sectionNumber,
+                            sectionName: sectionName,
+                            target: sectionTargetName
+                        }).addClass('Wikiplus-QuickEdit-Entrance');
+                        $(this).append(_sectionBtn);
+                    } catch (e) {
+                        self.Log.error('fail_to_init_quickedit');
+                    }
+                });
+            }
+        }
+
+        /**
+         * 绑定QuickEdit入口事件
+         */
+
+    }, {
+        key: 'bindQuickEditEvents',
+        value: function bindQuickEditEvents() {
+            $('.Wikiplus-QuickEdit-Entrance').click(function () {});
+        }
+
+        /**
+         * 绘制编辑UI
+         */
+
+    }, {
+        key: 'drawQuickEditUI',
+        value: function drawQuickEditUI() {}
     }, {
         key: 'loadCoreFunctions',
         value: function loadCoreFunctions() {
             this.coreConfig.init();
+            this.initQuickEdit();
         }
     }]);
 
@@ -713,7 +803,7 @@ var CoreConfig = function () {
             config["updatetime"] = new Date().getTime();
             var configString = JSON.stringify(config);
             var configPage = new _Wikipage.Wikipage('User:' + _api.API.getUsername() + '/Wikiplus-config.json');
-            configPage.setContent(configString, "Update Config via Wikiplus").then(function (data) {
+            configPage.setContent({ content: configString, summary: "Update Config via Wikiplus" }).then(function (data) {
                 _this4.notice.create.success((0, _i18n2.default)("Save config to Server successfully."));
                 _ui.UI.closeBox();
             }).catch(function (e) {
@@ -855,7 +945,7 @@ CoreConfig.objectiveConfig = {
     "modules": true
 };
 
-},{"./Wikipage":1,"./api":2,"./i18n":4,"./moduleManager":6,"./ui":8,"./util":9,"./version":10}],4:[function(require,module,exports){
+},{"./Wikipage":1,"./api":2,"./i18n":4,"./log":5,"./moduleManager":7,"./ui":9,"./util":10,"./version":11}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -958,7 +1048,55 @@ var I18n = exports.I18n = function () {
     return I18n;
 }();
 
-},{"./util":9,"./version":10}],5:[function(require,module,exports){
+},{"./util":10,"./version":11}],5:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Log = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      * Universal Logger
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      */
+
+
+var _i18n = require('./i18n');
+
+var _i18n2 = _interopRequireDefault(_i18n);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Log = exports.Log = function () {
+    function Log() {
+        _classCallCheck(this, Log);
+    }
+
+    _createClass(Log, [{
+        key: 'error',
+        value: function error(errorName) {
+            var e = new Error();
+            e.message = (0, _i18n2.default)(errorName) || errorName;
+            this.log('错误[' + errorName + ']:' + e.message, 'red');
+            this.log('Error Trace:', 'red');
+            console.log(e);
+            return e;
+        }
+    }, {
+        key: 'log',
+        value: function log(message) {
+            var color = arguments.length <= 1 || arguments[1] === undefined ? 'black' : arguments[1];
+
+            console.log('%c[Wikiplus]' + message, 'color:' + color);
+        }
+    }]);
+
+    return Log;
+}();
+
+},{"./i18n":4}],6:[function(require,module,exports){
 'use strict';
 
 var _core = require('./core');
@@ -969,15 +1107,15 @@ var _moenotice = require('./moenotice');
  * Wikiplus Main
  */
 $(function () {
-    var moenotice = new _moenotice.MoeNotification();
-    var wikiplus = window.Wikiplus = new _core.Wikiplus(moenotice);
+	var moenotice = new _moenotice.MoeNotification();
+	var wikiplus = window.Wikiplus = new _core.Wikiplus(moenotice);
 
-    //主过程启动
-    console.log('Wikiplus 开始加载');
-    wikiplus.start();
+	//主过程启动
+	console.log('Wikiplus 开始加载');
+	wikiplus.start();
 });
 
-},{"./core":3,"./moenotice":7}],6:[function(require,module,exports){
+},{"./core":3,"./moenotice":8}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1155,7 +1293,7 @@ var ModuleManager = exports.ModuleManager = function () {
     return ModuleManager;
 }();
 
-},{"./util":9,"./version":10}],7:[function(require,module,exports){
+},{"./util":10,"./version":11}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1241,7 +1379,7 @@ function MoeNotification() {
     }
 }
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1464,7 +1602,7 @@ var UI = exports.UI = function () {
     return UI;
 }();
 
-},{"./i18n":4}],9:[function(require,module,exports){
+},{"./i18n":4}],10:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1565,7 +1703,7 @@ var Util = exports.Util = function () {
     return Util;
 }();
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1581,9 +1719,8 @@ var Version = exports.Version = function Version() {
   _classCallCheck(this, Version);
 };
 
-;
 Version.VERSION = "0.0.7";
 Version.releaseNote = "i18n生成器的更新。";
-Version.scriptURL = "https://127.0.0.1"; //请不要以斜杠“/”结尾
+Version.scriptURL = "https://localhost/Wikiplus-3.0"; //请不要以斜杠“/”结尾
 
-},{}]},{},[5]);
+},{}]},{},[6]);
