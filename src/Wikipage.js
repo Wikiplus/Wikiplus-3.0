@@ -14,6 +14,7 @@ export class Wikipage {
         this.info = Promise.all([API.getEditToken(title), API.getTimeStamp(title)]).then((data) => {
             this.editToken = data[0];
             this.timeStamp = data[1];
+            console.log(`获取页面${title}信息成功`);
         }).catch((e) => {
             console.error('获取页面基础信息失败：', e);
         });
@@ -64,16 +65,34 @@ export class Wikipage {
      * @param section
      * @param {string} revision (可选)修订版本
      */
-    getWikiText(section = 'page', revision = this.lastestRevision) {
+    getWikiText(section = 'page', revision = undefined) {
         // page是一个不合法的参数值 但是MediaWiki会忽略不合法的参数值 等价于获取全页
         return new Promise((res, rej) => {
-            if (this.wikiTextCache[`${revision}.${section}`]){
-                res(this.wikiTextCache[`${revision}.${section}`])
+            if (revision){
+                if (this.wikiTextCache[`${revision}#${section}`]){
+                    res(this.wikiTextCache[`${revision}#${section}`]);
+                }
+                else{
+                    this.info = this.info.then(()=>{
+                        API.getWikiText(this.title, section, revision).then((wikiText)=>{
+                            this.wikiTextCache[`${revision}#${section}`] = wikiText;
+                            res(wikiText);
+                        }).catch(rej);
+                    })
+                }
             }
             else{
-                this.info = this.info.then(()=>{
-                    API.getWikiText(this.title, section, revision).then(res).catch(rej);
-                })
+                if (this.wikiTextCache[`${section}`]){
+                    res(this.wikiTextCache[`${section}`]);
+                }
+                else{
+                    this.info = this.info.then(()=>{
+                        API.getWikiText(this.title, section).then(wikiText=>{
+                            this.wikiTextCache[`${section}`] = wikiText;
+                            res(wikiText);
+                        })
+                    })
+                }
             }
         });
     }

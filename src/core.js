@@ -21,7 +21,7 @@ export class Wikiplus {
         this.Version = Version;
         this.notice = notice;
         this.API = API;
-        this.Wikipage = Wikipage;
+        this.Wikipage = new Wikipage();
         this.coreConfig = new CoreConfig(this.notice);
         this.Log = new Log();
 
@@ -36,7 +36,8 @@ export class Wikiplus {
         //载入模块
         this.mmr = new ModuleManager();
         this.loadCoreFunctions();
-        this.notice.create.success(_("Test Run"));
+
+        //
     }
 
     checkInstall() {

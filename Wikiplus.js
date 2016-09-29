@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-09-28
+ * 2016-09-29
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -47,6 +47,7 @@ var Wikipage = exports.Wikipage = function () {
         this.info = Promise.all([_api.API.getEditToken(title), _api.API.getTimeStamp(title)]).then(function (data) {
             _this.editToken = data[0];
             _this.timeStamp = data[1];
+            console.log('获取页面' + title + '信息成功');
         }).catch(function (e) {
             console.error('获取页面基础信息失败：', e);
         });
@@ -122,16 +123,32 @@ var Wikipage = exports.Wikipage = function () {
             var _this5 = this;
 
             var section = arguments.length <= 0 || arguments[0] === undefined ? 'page' : arguments[0];
-            var revision = arguments.length <= 1 || arguments[1] === undefined ? this.lastestRevision : arguments[1];
+            var revision = arguments.length <= 1 || arguments[1] === undefined ? undefined : arguments[1];
 
             // page是一个不合法的参数值 但是MediaWiki会忽略不合法的参数值 等价于获取全页
             return new Promise(function (res, rej) {
-                if (_this5.wikiTextCache[revision + '.' + section]) {
-                    res(_this5.wikiTextCache[revision + '.' + section]);
+                if (revision) {
+                    if (_this5.wikiTextCache[revision + '#' + section]) {
+                        res(_this5.wikiTextCache[revision + '#' + section]);
+                    } else {
+                        _this5.info = _this5.info.then(function () {
+                            _api.API.getWikiText(_this5.title, section, revision).then(function (wikiText) {
+                                _this5.wikiTextCache[revision + '#' + section] = wikiText;
+                                res(wikiText);
+                            }).catch(rej);
+                        });
+                    }
                 } else {
-                    _this5.info = _this5.info.then(function () {
-                        _api.API.getWikiText(_this5.title, section, revision).then(res).catch(rej);
-                    });
+                    if (_this5.wikiTextCache['' + section]) {
+                        res(_this5.wikiTextCache['' + section]);
+                    } else {
+                        _this5.info = _this5.info.then(function () {
+                            _api.API.getWikiText(_this5.title, section).then(function (wikiText) {
+                                _this5.wikiTextCache['' + section] = wikiText;
+                                res(wikiText);
+                            });
+                        });
+                    }
                 }
             });
         }
@@ -438,8 +455,10 @@ var API = exports.API = function () {
                     dataType: "text",
                     cache: false,
                     data: {
-                        'title': title,
-                        'action': 'raw'
+                        "title": title,
+                        "action": 'raw',
+                        "oldid": revision,
+                        "section": section
                     },
                     beforeSend: function beforeSend() {
                         console.time('获得页面文本耗时');
@@ -543,7 +562,7 @@ var Wikiplus = exports.Wikiplus = function () {
         this.Version = _version.Version;
         this.notice = notice;
         this.API = _api.API;
-        this.Wikipage = _Wikipage.Wikipage;
+        this.Wikipage = new _Wikipage.Wikipage();
         this.coreConfig = new CoreConfig(this.notice);
         this.Log = new _log.Log();
 
@@ -560,7 +579,8 @@ var Wikiplus = exports.Wikiplus = function () {
             //载入模块
             this.mmr = new _moduleManager.ModuleManager();
             this.loadCoreFunctions();
-            this.notice.create.success((0, _i18n2.default)("Test Run"));
+
+            //
         }
     }, {
         key: 'checkInstall',

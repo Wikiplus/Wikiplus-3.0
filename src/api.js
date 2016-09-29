@@ -251,8 +251,10 @@ export class API {
                 dataType: "text",
                 cache: false,
                 data: {
-                    'title': title,
-                    'action': 'raw'
+                    "title": title,
+                    "action": 'raw',
+                    "oldid": revision,
+                    "section": section
                 },
                 beforeSend: function () {
                     console.time('获得页面文本耗时');
