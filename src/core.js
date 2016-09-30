@@ -175,7 +175,9 @@ export class Wikiplus {
             page.getWikiText(editSetting.sectionNumber, editSetting.revision).then(wikiText=> {
                 let UISettings = {
                     "content": wikiText,
-                    "page": page
+                    "page": page,
+                    "sectionName": editSetting.sectionName,
+                    "sectionNumber": editSetting.sectionNumber
                 };
                 if (editSetting.revision !== window.mw.config.values.wgCurRevisionId) {
                     UISettings.title = `${_('QuickEdit')} // ${_('history_edit_warning')}`;
@@ -255,7 +257,28 @@ export class Wikiplus {
                     let timer = new Date().valueOf();
                     let onEdit = $('<div>').addClass('Wikiplus-Banner').text(`${_('submitting_edit')}`);
 
+                    let additionalConfig = {
+                        'summary': summary
+                    };
+                    if (options.sectionNumber !== 'page') {
+                        additionalConfig['section'] = options.sectionNumber;
+                    }
+                    if ($('#Wikiplus-Quickedit-MinorEdit').is(':checked')) {
+                        additionalConfig['minor'] = 'true';
+                    }
+                    // 准备编辑
+                    $('#Wikiplus-Quickedit-Submit,#Wikiplus-Quickedit,#Wikiplus-Quickedit-Preview-Submit').attr('disabled', 'disabled');
+                    $('body').animate({ scrollTop: heightBefore }, 200);
 
+                    outputArea.fadeOut(100, ()=> {
+                        outputArea.html('').append(onEdit).fadeIn(100);
+                    });
+
+                    options.page.setContent(wikiText, additionalConfig).then(()=>{
+                        outputArea.html()
+                    }).catch(()=>{
+                        console.log('OAO');
+                    })
                 })
             }
         })

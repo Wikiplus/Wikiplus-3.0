@@ -144,7 +144,7 @@ export class API {
      * 页面编辑
      * @param {object} config
      */
-    static edit(config) {
+    static edit(config = {}) {
         return new Promise((resolve, reject) => {
             $.ajax({
                 type: "POST",
@@ -152,13 +152,8 @@ export class API {
                 url: this.getAPIURL(),
                 data: $.extend({
                     'action': 'edit',
-                    'format': 'json',
-                    'text': config.content,
-                    'title': config.title,
-                    'token': config.editToken,
-                    'basetimestamp': config.timeStamp,
-                    'summary': config.summary
-                }, config.addtionalConfig || {}),
+                    'format': 'json'
+                }, config),
                 success: (data) => {
                     if (data && data.edit) {
                         if (data.edit.result && data.edit.result == 'Success') {

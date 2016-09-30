@@ -50,9 +50,9 @@ export class Wikipage {
             this.info = this.info.then(() => {
                 API.edit($.extend({
                     "title": this.title,
-                    "editToken": this.editToken,
-                    "timeStamp": this.timeStamp,
-                    "content": content
+                    "token": this.editToken,
+                    "basetimestamp": this.timeStamp,
+                    "text": content
                 }, config)).then(data=> {
                     res(data);
                 });

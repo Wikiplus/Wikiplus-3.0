@@ -101,9 +101,9 @@ var Wikipage = exports.Wikipage = function () {
                 _this4.info = _this4.info.then(function () {
                     _api.API.edit($.extend({
                         "title": _this4.title,
-                        "editToken": _this4.editToken,
-                        "timeStamp": _this4.timeStamp,
-                        "content": content
+                        "token": _this4.editToken,
+                        "basetimestamp": _this4.timeStamp,
+                        "text": content
                     }, config)).then(function (data) {
                         res(data);
                     });
@@ -360,8 +360,10 @@ var API = exports.API = function () {
 
     }, {
         key: 'edit',
-        value: function edit(config) {
+        value: function edit() {
             var _this2 = this;
+
+            var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
             return new Promise(function (resolve, reject) {
                 $.ajax({
@@ -370,13 +372,8 @@ var API = exports.API = function () {
                     url: _this2.getAPIURL(),
                     data: $.extend({
                         'action': 'edit',
-                        'format': 'json',
-                        'text': config.content,
-                        'title': config.title,
-                        'token': config.editToken,
-                        'basetimestamp': config.timeStamp,
-                        'summary': config.summary
-                    }, config.addtionalConfig || {}),
+                        'format': 'json'
+                    }, config),
                     success: function success(data) {
                         if (data && data.edit) {
                             if (data.edit.result && data.edit.result == 'Success') {
@@ -741,7 +738,9 @@ var Wikiplus = exports.Wikiplus = function () {
                 page.getWikiText(editSetting.sectionNumber, editSetting.revision).then(function (wikiText) {
                     var UISettings = {
                         "content": wikiText,
-                        "page": page
+                        "page": page,
+                        "sectionName": editSetting.sectionName,
+                        "sectionNumber": editSetting.sectionNumber
                     };
                     if (editSetting.revision !== window.mw.config.values.wgCurRevisionId) {
                         UISettings.title = (0, _i18n2.default)('QuickEdit') + ' // ' + (0, _i18n2.default)('history_edit_warning');
@@ -819,6 +818,29 @@ var Wikiplus = exports.Wikiplus = function () {
                         var summary = $('#Wikiplus-Quickedit-Summary-Input').val();
                         var timer = new Date().valueOf();
                         var onEdit = $('<div>').addClass('Wikiplus-Banner').text('' + (0, _i18n2.default)('submitting_edit'));
+
+                        var additionalConfig = {
+                            'summary': summary
+                        };
+                        if (options.sectionNumber !== 'page') {
+                            additionalConfig['section'] = options.sectionNumber;
+                        }
+                        if ($('#Wikiplus-Quickedit-MinorEdit').is(':checked')) {
+                            additionalConfig['minor'] = 'true';
+                        }
+                        // 准备编辑
+                        $('#Wikiplus-Quickedit-Submit,#Wikiplus-Quickedit,#Wikiplus-Quickedit-Preview-Submit').attr('disabled', 'disabled');
+                        $('body').animate({ scrollTop: heightBefore }, 200);
+
+                        outputArea.fadeOut(100, function () {
+                            outputArea.html('').append(onEdit).fadeIn(100);
+                        });
+
+                        options.page.setContent(wikiText, additionalConfig).then(function () {
+                            outputArea.html();
+                        }).catch(function () {
+                            console.log('OAO');
+                        });
                     });
                 }
             });
