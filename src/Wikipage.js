@@ -96,4 +96,18 @@ export class Wikipage {
             }
         });
     }
+
+    /**
+     * 解析页面文本
+     * @param wikiText
+     * @param pageName
+     * @returns {Promise}
+     */
+    parseWikiText(wikiText = '', pageName = this.title){
+        return new Promise((res, rej)=>{
+            this.info = this.info.then(()=>{
+                API.parseWikiText(wikiText, this.title).then(res).catch(rej);
+            })
+        })
+    }
 }

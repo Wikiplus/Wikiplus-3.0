@@ -37,7 +37,6 @@ export class Wikiplus {
         this.mmr = new ModuleManager();
         this.loadCoreFunctions();
 
-        //
     }
 
     checkInstall() {
@@ -93,7 +92,7 @@ export class Wikiplus {
     /**
      * 初始化快速编辑
      */
-    initQuickEdit(){
+    initQuickEdit() {
         // 分析网页链接
         if (!(mw.config.values.wgIsArticle && mw.config.values.wgAction === "view" && mw.config.values.wgIsProbablyEditable)) {
             console.log('该页面无法编辑 快速编辑界面加载终止');
@@ -105,7 +104,7 @@ export class Wikiplus {
     /**
      * 生成快速编辑按钮
      */
-    generateQuickEditButtons(){
+    generateQuickEditButtons() {
         // 顶部按钮
         let self = this;
         let topBtn = $('<li>').attr('id', 'Wikiplus-Edit-TopBtn').append(
@@ -113,8 +112,9 @@ export class Wikiplus {
                 $('<a>').attr('href', 'javascript:void(0)').text(`${_('QuickEdit')}`)
             )
         ).data({
-            sectionNumber: -1,
+            sectionNumber: 'page',
             target: this.API.getThisPageName(),
+            revision: window.mw.config.values.wgRevisionId
         }).addClass('Wikiplus-QuickEdit-Entrance');
 
         if ($('#ca-edit').length > 0 && $('#Wikiplus-Edit-TopBtn').length == 0) {
@@ -146,7 +146,8 @@ export class Wikiplus {
                     _sectionBtn.find('.Wikiplus-Edit-SectionBtn').data({
                         sectionNumber: sectionNumber,
                         sectionName: sectionName,
-                        target: sectionTargetName
+                        target: sectionTargetName,
+                        revision: window.mw.config.values.wgRevisionId
                     }).addClass('Wikiplus-QuickEdit-Entrance');
                     $(this).append(_sectionBtn);
                 }
@@ -162,38 +163,55 @@ export class Wikiplus {
     /**
      * 绑定QuickEdit入口事件
      */
-    bindQuickEditEvents(){
+    bindQuickEditEvents() {
         let self = this;
-        $('.Wikiplus-QuickEdit-Entrance').click(function(){
-            self.generateQuickEditUI({
-                "editSettings": $(this).data()
-            });
+        $('.Wikiplus-QuickEdit-Entrance').click(function () {
+            let editSetting = $(this).data();
+            let page = self.Wikipage;
+            if (editSetting.target !== self.API.getThisPageName()) {
+                // 编辑目标并不是本页面
+                page = new Wikipage(editSetting.target);
+            }
+            page.getWikiText(editSetting.sectionNumber, editSetting.revision).then(wikiText=> {
+                let UISettings = {
+                    "content": wikiText,
+                    "page": page
+                };
+                if (editSetting.revision !== window.mw.config.values.wgCurRevisionId) {
+                    UISettings.title = `${_('QuickEdit')} // ${_('history_edit_warning')}`;
+                }
+                if (editSetting.sectionName) {
+                    UISettings.summary = `/* ${editSetting.sectionName} */ ${_('default_summary')}`;
+                }
+                self.generateQuickEditUI(UISettings);
+            })
         })
     }
 
     /**
      * 向页面插入Wikiplus快速编辑界面
      */
-    generateQuickEditUI(options = {}){
+    generateQuickEditUI(options = {}) {
         let title = options.title || _('QuickEdit');
         let summary = options.summary || _('default_summary');
+        let content = options.content || '';
 
         let backBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Back').addClass('Wikiplus-Btn').text(`${_('back')}`);//返回按钮
         let jumpBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Jump').addClass('Wikiplus-Btn').append(
             $('<a>').attr('href', '#Wikiplus-Quickedit').text(`${_('goto_editbox')}`)
         );//到编辑框
-        let inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit');//主编辑框
+        let inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit').val(content);//主编辑框
         let previewBox = $('<div>').attr('id', 'Wikiplus-Quickedit-Preview-Output');//预览输出
         let summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', `${_('summary_placehold')}`).val(summary);//编辑摘要输入
         let editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text(`${_('submit')}(Ctrl+S)`);//提交按钮
         let previewSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Preview-Submit').text(`${_('preview')}`);//预览按钮
         let isMinorEdit = $('<div>').append(
-            $('<input>').attr({ 'type': 'checkbox', 'id': 'Wikiplus-Quickedit-MinorEdit' })
+            $('<input>').attr({'type': 'checkbox', 'id': 'Wikiplus-Quickedit-MinorEdit'})
         )
             .append(
                 $('<label>').attr('for', 'Wikiplus-Quickedit-MinorEdit').text(`${_('mark_minoredit')}(Ctrl+Shift+S)`)
             )
-            .css({ 'margin': '5px 5px 5px -3px', 'display': 'inline' });
+            .css({'margin': '5px 5px 5px -3px', 'display': 'inline'});
         //DOM定义结束
         let editBody = $('<div>').append(backBtn, jumpBtn, previewBox, inputBox, summaryBox, $('<br>'), isMinorEdit, editSubmitBtn, previewSubmitBtn);
 
@@ -202,6 +220,43 @@ export class Wikiplus {
             "content": editBody,
             "width": 1000,
             "callback": ()=>{
+                // 绑定界面事件
+                let heightBefore = $(document).scrollTop();
+                let outputArea = $('#Wikiplus-Quickedit-Preview-Output');
+                let self = this;
+
+                // 返回按钮 等同关闭
+                $("#Wikiplus-Quickedit-Back").click(()=> {
+                    $(".Wikiplus-InterBox-Close").click();
+                });
+
+                // 预览
+                let onPreload = $('<div>').addClass('Wikiplus-Banner').text(`${_('loading_preview')}`);
+                $('#Wikiplus-Quickedit-Preview-Submit').click(function () {
+                    let wikiText = $('#Wikiplus-Quickedit').val();
+                    $(this).attr('disabled', 'disabled');
+                    outputArea.fadeOut(100, ()=> {
+                        outputArea.html('').append(onPreload).fadeIn(100);
+                    });
+                    $('body').animate({scrollTop: heightBefore}, 200);//返回顶部
+
+                    self.Wikipage.parseWikiText(wikiText).then(html=>{
+                        outputArea.fadeOut(100, ()=>{
+                            outputArea.html(html).fadeIn(100);
+                            $('#Wikiplus-Quickedit-Preview-Submit').removeAttr('disabled');
+                        })
+                    })
+                });
+
+                // 提交
+                $('#Wikiplus-Quickedit-Submit').click(()=>{
+                    let wikiText = $('#Wikiplus-Quickedit').val();
+                    let summary = $('#Wikiplus-Quickedit-Summary-Input').val();
+                    let timer = new Date().valueOf();
+                    let onEdit = $('<div>').addClass('Wikiplus-Banner').text(`${_('submitting_edit')}`);
+
+                    
+                })
             }
         })
     }

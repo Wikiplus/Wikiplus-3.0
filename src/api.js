@@ -273,8 +273,9 @@ export class API {
     /**
      * 解析WikiText
      * @param {string} wikitext
+     * @param pageName
      */
-    static parseWikiText(wikitext = '') {
+    static parseWikiText(wikitext = '', pageName = this.getThisPageName()) {
         return new Promise((resolve, reject) => {
             $.ajax({
                 type: 'POST',
@@ -283,7 +284,7 @@ export class API {
                     'format': 'json',
                     'action': 'parse',
                     'text': wikitext,
-                    'title': this.getThisPageName(),
+                    'title': pageName,
                     'pst': 'true'
                 },
                 url: this.getAPIURL(),

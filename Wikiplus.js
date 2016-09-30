@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-09-29
+ * 2016-09-30
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -150,6 +150,28 @@ var Wikipage = exports.Wikipage = function () {
                         });
                     }
                 }
+            });
+        }
+
+        /**
+         * 解析页面文本
+         * @param wikiText
+         * @param pageName
+         * @returns {Promise}
+         */
+
+    }, {
+        key: 'parseWikiText',
+        value: function parseWikiText() {
+            var _this6 = this;
+
+            var wikiText = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+            var pageName = arguments.length <= 1 || arguments[1] === undefined ? this.title : arguments[1];
+
+            return new Promise(function (res, rej) {
+                _this6.info = _this6.info.then(function () {
+                    _api.API.parseWikiText(wikiText, _this6.title).then(res).catch(rej);
+                });
             });
         }
     }]);
@@ -477,6 +499,7 @@ var API = exports.API = function () {
         /**
          * 解析WikiText
          * @param {string} wikitext
+         * @param pageName
          */
 
     }, {
@@ -485,6 +508,7 @@ var API = exports.API = function () {
             var _this3 = this;
 
             var wikitext = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+            var pageName = arguments.length <= 1 || arguments[1] === undefined ? this.getThisPageName() : arguments[1];
 
             return new Promise(function (resolve, reject) {
                 $.ajax({
@@ -494,7 +518,7 @@ var API = exports.API = function () {
                         'format': 'json',
                         'action': 'parse',
                         'text': wikitext,
-                        'title': _this3.getThisPageName(),
+                        'title': pageName,
                         'pst': 'true'
                     },
                     url: _this3.getAPIURL(),
@@ -579,8 +603,6 @@ var Wikiplus = exports.Wikiplus = function () {
             //载入模块
             this.mmr = new _moduleManager.ModuleManager();
             this.loadCoreFunctions();
-
-            //
         }
     }, {
         key: 'checkInstall',
@@ -660,8 +682,9 @@ var Wikiplus = exports.Wikiplus = function () {
             // 顶部按钮
             var self = this;
             var topBtn = $('<li>').attr('id', 'Wikiplus-Edit-TopBtn').append($('<span>').append($('<a>').attr('href', 'javascript:void(0)').text('' + (0, _i18n2.default)('QuickEdit')))).data({
-                sectionNumber: -1,
-                target: this.API.getThisPageName()
+                sectionNumber: 'page',
+                target: this.API.getThisPageName(),
+                revision: window.mw.config.values.wgRevisionId
             }).addClass('Wikiplus-QuickEdit-Entrance');
 
             if ($('#ca-edit').length > 0 && $('#Wikiplus-Edit-TopBtn').length == 0) {
@@ -687,7 +710,8 @@ var Wikiplus = exports.Wikiplus = function () {
                         _sectionBtn.find('.Wikiplus-Edit-SectionBtn').data({
                             sectionNumber: sectionNumber,
                             sectionName: sectionName,
-                            target: sectionTargetName
+                            target: sectionTargetName,
+                            revision: window.mw.config.values.wgRevisionId
                         }).addClass('Wikiplus-QuickEdit-Entrance');
                         $(this).append(_sectionBtn);
                     } catch (e) {
@@ -708,8 +732,24 @@ var Wikiplus = exports.Wikiplus = function () {
         value: function bindQuickEditEvents() {
             var self = this;
             $('.Wikiplus-QuickEdit-Entrance').click(function () {
-                self.generateQuickEditUI({
-                    "editSettings": $(this).data()
+                var editSetting = $(this).data();
+                var page = self.Wikipage;
+                if (editSetting.target !== self.API.getThisPageName()) {
+                    // 编辑目标并不是本页面
+                    page = new _Wikipage.Wikipage(editSetting.target);
+                }
+                page.getWikiText(editSetting.sectionNumber, editSetting.revision).then(function (wikiText) {
+                    var UISettings = {
+                        "content": wikiText,
+                        "page": page
+                    };
+                    if (editSetting.revision !== window.mw.config.values.wgCurRevisionId) {
+                        UISettings.title = (0, _i18n2.default)('QuickEdit') + ' // ' + (0, _i18n2.default)('history_edit_warning');
+                    }
+                    if (editSetting.sectionName) {
+                        UISettings.summary = '/* ' + editSetting.sectionName + ' */ ' + (0, _i18n2.default)('default_summary');
+                    }
+                    self.generateQuickEditUI(UISettings);
                 });
             });
         }
@@ -721,14 +761,17 @@ var Wikiplus = exports.Wikiplus = function () {
     }, {
         key: 'generateQuickEditUI',
         value: function generateQuickEditUI() {
+            var _this2 = this;
+
             var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
             var title = options.title || (0, _i18n2.default)('QuickEdit');
             var summary = options.summary || (0, _i18n2.default)('default_summary');
+            var content = options.content || '';
 
             var backBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Back').addClass('Wikiplus-Btn').text('' + (0, _i18n2.default)('back')); //返回按钮
             var jumpBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Jump').addClass('Wikiplus-Btn').append($('<a>').attr('href', '#Wikiplus-Quickedit').text('' + (0, _i18n2.default)('goto_editbox'))); //到编辑框
-            var inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit'); //主编辑框
+            var inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit').val(content); //主编辑框
             var previewBox = $('<div>').attr('id', 'Wikiplus-Quickedit-Preview-Output'); //预览输出
             var summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', '' + (0, _i18n2.default)('summary_placehold')).val(summary); //编辑摘要输入
             var editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text((0, _i18n2.default)('submit') + '(Ctrl+S)'); //提交按钮
@@ -741,7 +784,43 @@ var Wikiplus = exports.Wikiplus = function () {
                 "title": title,
                 "content": editBody,
                 "width": 1000,
-                "callback": function callback() {}
+                "callback": function callback() {
+                    // 绑定界面事件
+                    var heightBefore = $(document).scrollTop();
+                    var outputArea = $('#Wikiplus-Quickedit-Preview-Output');
+                    var self = _this2;
+
+                    // 返回按钮 等同关闭
+                    $("#Wikiplus-Quickedit-Back").click(function () {
+                        $(".Wikiplus-InterBox-Close").click();
+                    });
+
+                    // 预览
+                    var onPreload = $('<div>').addClass('Wikiplus-Banner').text('' + (0, _i18n2.default)('loading_preview'));
+                    $('#Wikiplus-Quickedit-Preview-Submit').click(function () {
+                        var wikiText = $('#Wikiplus-Quickedit').val();
+                        $(this).attr('disabled', 'disabled');
+                        outputArea.fadeOut(100, function () {
+                            outputArea.html('').append(onPreload).fadeIn(100);
+                        });
+                        $('body').animate({ scrollTop: heightBefore }, 200); //返回顶部
+
+                        self.Wikipage.parseWikiText(wikiText).then(function (html) {
+                            outputArea.fadeOut(100, function () {
+                                outputArea.html(html).fadeIn(100);
+                                $('#Wikiplus-Quickedit-Preview-Submit').removeAttr('disabled');
+                            });
+                        });
+                    });
+
+                    // 提交
+                    $('#Wikiplus-Quickedit-Submit').click(function () {
+                        var wikiText = $('#Wikiplus-Quickedit').val();
+                        var summary = $('#Wikiplus-Quickedit-Summary-Input').val();
+                        var timer = new Date().valueOf();
+                        var onEdit = $('<div>').addClass('Wikiplus-Banner').text('' + (0, _i18n2.default)('submitting_edit'));
+                    });
+                }
             });
         }
     }, {
@@ -765,14 +844,14 @@ var CoreConfig = function () {
     _createClass(CoreConfig, [{
         key: 'init',
         value: function init() {
-            var _this2 = this;
+            var _this3 = this;
 
             if (_api.API.getThisPageName().substr(5) == _api.API.getUsername()) {
                 _ui.UI.addLinkInToolbox({
                     name: (0, _i18n2.default)("Wikiplus Config"),
                     title: (0, _i18n2.default)("Configurations for global Wikiplus."),
                     callback: function callback() {
-                        _this2.drawConfigBox();
+                        _this3.drawConfigBox();
                     }
                 });
             }
@@ -780,7 +859,7 @@ var CoreConfig = function () {
     }, {
         key: 'drawConfigBox',
         value: function drawConfigBox() {
-            var _this3 = this;
+            var _this4 = this;
 
             var boxContent = $('<div id="wikiplus-config-area"><p>' + (0, _i18n2.default)("You could change Wikiplus settings here. These settings will work on the whole Wiki.") + '</p><br></div>');
 
@@ -811,8 +890,8 @@ var CoreConfig = function () {
             //从服务器恢复设置
             var loadConfigBtn = $('<input type="button" id="wikiplus-config-btn-loadconfig" value="' + (0, _i18n2.default)("Load Config") + '">');
             loadConfigBtn.click(function () {
-                _this3.notice.create.success((0, _i18n2.default)("Checking if had configuration on this wiki."));
-                _this3.loadConfig();
+                _this4.notice.create.success((0, _i18n2.default)("Checking if had configuration on this wiki."));
+                _this4.loadConfig();
             });
             boxContent.append($("<hr>")).append($('<p><b>' + (0, _i18n2.default)("Load Config from server") + '</b>: </p>').append(loadConfigBtn));
 
@@ -831,7 +910,7 @@ var CoreConfig = function () {
                     return $.trim(i);
                 });
 
-                _this3.saveConfig(config);
+                _this4.saveConfig(config);
             });
 
             boxContent.append(cancelConfigBtn).append(saveConfigBtn);
@@ -845,7 +924,7 @@ var CoreConfig = function () {
     }, {
         key: 'saveConfig',
         value: function saveConfig(config) {
-            var _this4 = this;
+            var _this5 = this;
 
             //保存至本地
             this.saveConfigToLocal(config);
@@ -854,10 +933,10 @@ var CoreConfig = function () {
             var configString = JSON.stringify(config);
             var configPage = new _Wikipage.Wikipage('User:' + _api.API.getUsername() + '/Wikiplus-config.json');
             configPage.setContent({ content: configString, summary: "Update Config via Wikiplus" }).then(function (data) {
-                _this4.notice.create.success((0, _i18n2.default)("Save config to Server successfully."));
+                _this5.notice.create.success((0, _i18n2.default)("Save config to Server successfully."));
                 _ui.UI.closeBox();
             }).catch(function (e) {
-                _this4.notice.create.error((0, _i18n2.default)("Save config to Server failed."));
+                _this5.notice.create.error((0, _i18n2.default)("Save config to Server failed."));
             });
         }
     }, {
@@ -897,7 +976,7 @@ var CoreConfig = function () {
     }, {
         key: 'loadConfig',
         value: function loadConfig() {
-            var _this5 = this;
+            var _this6 = this;
 
             this.loadConfigHelper().then(function (config) {
                 _ui.UI.createDialog({
@@ -907,7 +986,7 @@ var CoreConfig = function () {
                 }).then(function (res) {
                     if (res) {
                         delete config["updatetime"];
-                        _this5.saveConfigToLocal(config);
+                        _this6.saveConfigToLocal(config);
                     }
                     _ui.UI.closeBox();
                 });
@@ -922,7 +1001,7 @@ var CoreConfig = function () {
                         errorInfo = (0, _i18n2.default)("Can not find any configuration for you on this wiki.");
                         break;
                 }
-                _this5.notice.create.error(errorInfo);
+                _this6.notice.create.error(errorInfo);
             });
         }
     }, {
