@@ -255,7 +255,7 @@ export class Wikiplus {
                     let timer = new Date().valueOf();
                     let onEdit = $('<div>').addClass('Wikiplus-Banner').text(`${_('submitting_edit')}`);
 
-                    
+
                 })
             }
         })
