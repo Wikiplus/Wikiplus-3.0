@@ -1,6 +1,6 @@
 {
     "language": "zh-cn",
-    "update_time": "2016-09-28 19:28:43",
+    "update_time": "2016-10-04 21:14:58",
     "defaultScope": {
 
 "Allow":
@@ -29,6 +29,9 @@
 
 "Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?":
 "你允许Wikiplus收集一些非敏感的信息来帮助改善和为当前Wiki:$1提供支持吗？",
+
+"Edit submitted":
+"<Translate Here>",
 
 "Find a uploaded configuration of $1. Do you want to import this config now?":
 "找到一个上传于$1的配置文件，是否立即导入？",
@@ -66,17 +69,14 @@
 "Save config to local successfully.":
 "本地配置成功。",
 
-"Saved configuration on server is invaild.":
-"服务器上的配置文件无效。",
+"Saved configuration on server is invalid.":
+"<Translate Here>",
 
 "Send Statistics":
 "发送统计信息",
 
-"Test Run":
-"测试运行",
-
-"Type comma-saparated module names here.":
-"将需要加载的的模块名以逗号分隔填写在此：",
+"Type comma-separated module names here.":
+"<Translate Here>",
 
 "Wikiplus":
 "Wikiplus",
@@ -102,14 +102,26 @@
 "default_summary":
 " // Edit via Wikiplus",
 
+"fail_to_get_edittoken":
+"无法获得编辑权标",
+
 "goto_editbox":
 "至编辑框",
+
+"history_edit_warning":
+"您正在编辑本页面的历史版本，若提交将会覆盖最新版本，请慎重",
 
 "hit_abusefilter":
 "触发防滥用过滤器",
 
+"loading_preview":
+"正在载入预览",
+
 "mark_minoredit":
 "编辑为小编辑",
+
+"network_edit_error":
+"由于网络原因编辑失败",
 
 "preview":
 "预览",
@@ -117,8 +129,14 @@
 "submit":
 "提交",
 
-"summary_placehold":
-"编辑摘要"
+"submitting_edit":
+"正在提交编辑",
+
+"summary_placeholder":
+"编辑摘要",
+
+"unknown_edit_error":
+"未知的编辑错误"
 
     }
 }

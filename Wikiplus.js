@@ -773,7 +773,7 @@ var Wikiplus = exports.Wikiplus = function () {
             var jumpBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Jump').addClass('Wikiplus-Btn').append($('<a>').attr('href', '#Wikiplus-Quickedit').text('' + (0, _i18n2.default)('goto_editbox'))); //到编辑框
             var inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit').val(content); //主编辑框
             var previewBox = $('<div>').attr('id', 'Wikiplus-Quickedit-Preview-Output'); //预览输出
-            var summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', '' + (0, _i18n2.default)('summary_placehold')).val(summary); //编辑摘要输入
+            var summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', '' + (0, _i18n2.default)('summary_placeholder')).val(summary); //编辑摘要输入
             var editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text((0, _i18n2.default)('submit') + '(Ctrl+S)'); //提交按钮
             var previewSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Preview-Submit').text('' + (0, _i18n2.default)('preview')); //预览按钮
             var isMinorEdit = $('<div>').append($('<input>').attr({ 'type': 'checkbox', 'id': 'Wikiplus-Quickedit-MinorEdit' })).append($('<label>').attr('for', 'Wikiplus-Quickedit-MinorEdit').text((0, _i18n2.default)('mark_minoredit') + '(Ctrl+Shift+S)')).css({ 'margin': '5px 5px 5px -3px', 'display': 'inline' });
@@ -807,7 +807,8 @@ var Wikiplus = exports.Wikiplus = function () {
 
                         self.Wikipage.parseWikiText(wikiText).then(function (html) {
                             outputArea.fadeOut(100, function () {
-                                outputArea.html(html).fadeIn(100);
+                                // 预览区域须有一个mw-body-content包裹 这样可以引用mw的一些默认样式
+                                outputArea.html('<hr><div class="mw-body-content">' + html + '</div>').fadeIn(100);
                                 $('#Wikiplus-Quickedit-Preview-Submit').removeAttr('disabled');
                             });
                         });
@@ -839,10 +840,16 @@ var Wikiplus = exports.Wikiplus = function () {
 
                         options.page.setContent(wikiText, additionalConfig).then(function () {
                             outputArea.fadeOut(100, function () {
-                                outputArea.html((0, _i18n2.default)('edit_success', new Date().valueOf() - timer)).fadeIn(100);
+                                outputArea.find('.Wikiplus-Banner').css('background', 'rgba(6, 239, 92, 0.44)');
+                                outputArea.find('.Wikiplus-Banner').html((0, _i18n2.default)('Edit submitted'));
+                                outputArea.fadeIn(100);
                             });
-                        }).catch(function () {
-                            console.log('OAO');
+                        }).catch(function (e) {
+                            outputArea.fadeOut(100, function () {
+                                outputArea.find('.Wikiplus-Banner').css('background', 'rgba(218, 142, 167, 0.65)');
+                                outputArea.find('.Wikiplus-Banner').html(e);
+                                outputArea.fadeIn(100);
+                            });
                         });
                     });
                 }
@@ -910,7 +917,7 @@ var CoreConfig = function () {
                 modulesConfig = [];
             }
             var modulesInput = $('<textarea id="wikiplus-config-it-modules"></textarea>').val(modulesConfig.join(", "));
-            boxContent.append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n2.default)("Type comma-saparated module names here.") + '</p>').append(modulesInput));
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n2.default)("Type comma-separated module names here.") + '</p>').append(modulesInput));
 
             //从服务器恢复设置
             var loadConfigBtn = $('<input type="button" id="wikiplus-config-btn-loadconfig" value="' + (0, _i18n2.default)("Load Config") + '">');
@@ -1018,9 +1025,9 @@ var CoreConfig = function () {
             }).catch(function (res) {
                 var errorInfo = "";
                 switch (res) {
-                    case "invaild":
+                    case "invalid":
                     case "cannotparse":
-                        errorInfo = (0, _i18n2.default)("Saved configuration on server is invaild.");
+                        errorInfo = (0, _i18n2.default)("Saved configuration on server is invalid.");
                         break;
                     case "empty":
                         errorInfo = (0, _i18n2.default)("Can not find any configuration for you on this wiki.");
@@ -1041,7 +1048,7 @@ var CoreConfig = function () {
                             if (config.updatetime) {
                                 res(config);
                             } else {
-                                rej("invaild");
+                                rej("invalid");
                             }
                         } catch (err) {
                             rej("cannotparse");

@@ -1,6 +1,6 @@
 {
     "language": "default",
-    "update_time": "2016-09-28 19:28:43",
+    "update_time": "2016-10-04 21:14:58",
     "defaultScope": {
 
 "Allow":
@@ -28,6 +28,9 @@
 "<Translate Here>",
 
 "Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?":
+"<Translate Here>",
+
+"Edit submitted":
 "<Translate Here>",
 
 "Find a uploaded configuration of $1. Do you want to import this config now?":
@@ -66,16 +69,13 @@
 "Save config to local successfully.":
 "<Translate Here>",
 
-"Saved configuration on server is invaild.":
+"Saved configuration on server is invalid.":
 "<Translate Here>",
 
 "Send Statistics":
 "<Translate Here>",
 
-"Test Run":
-"<Translate Here>",
-
-"Type comma-saparated module names here.":
+"Type comma-separated module names here.":
 "<Translate Here>",
 
 "Wikiplus":
@@ -102,13 +102,25 @@
 "default_summary":
 "<Translate Here>",
 
+"fail_to_get_edittoken":
+"<Translate Here>",
+
 "goto_editbox":
+"<Translate Here>",
+
+"history_edit_warning":
 "<Translate Here>",
 
 "hit_abusefilter":
 "<Translate Here>",
 
+"loading_preview":
+"<Translate Here>",
+
 "mark_minoredit":
+"<Translate Here>",
+
+"network_edit_error":
 "<Translate Here>",
 
 "preview":
@@ -117,7 +129,13 @@
 "submit":
 "<Translate Here>",
 
-"summary_placehold":
+"submitting_edit":
+"<Translate Here>",
+
+"summary_placeholder":
+"<Translate Here>",
+
+"unknown_edit_error":
 "<Translate Here>"
 
     }

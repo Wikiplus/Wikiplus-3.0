@@ -204,7 +204,7 @@ export class Wikiplus {
         );//到编辑框
         let inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit').val(content);//主编辑框
         let previewBox = $('<div>').attr('id', 'Wikiplus-Quickedit-Preview-Output');//预览输出
-        let summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', `${_('summary_placehold')}`).val(summary);//编辑摘要输入
+        let summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', `${_('summary_placeholder')}`).val(summary);//编辑摘要输入
         let editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text(`${_('submit')}(Ctrl+S)`);//提交按钮
         let previewSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Preview-Submit').text(`${_('preview')}`);//预览按钮
         let isMinorEdit = $('<div>').append(
@@ -244,7 +244,8 @@ export class Wikiplus {
 
                     self.Wikipage.parseWikiText(wikiText).then(html=>{
                         outputArea.fadeOut(100, ()=>{
-                            outputArea.html(html).fadeIn(100);
+                            // 预览区域须有一个mw-body-content包裹 这样可以引用mw的一些默认样式
+                            outputArea.html(`<hr><div class="mw-body-content">${html}</div>`).fadeIn(100);
                             $('#Wikiplus-Quickedit-Preview-Submit').removeAttr('disabled');
                         })
                     })
@@ -276,10 +277,16 @@ export class Wikiplus {
 
                     options.page.setContent(wikiText, additionalConfig).then(()=>{
                         outputArea.fadeOut(100, ()=>{
-                            outputArea.html(_('edit_success', new Date().valueOf() - timer)).fadeIn(100);
+                            outputArea.find('.Wikiplus-Banner').css('background', 'rgba(6, 239, 92, 0.44)');
+                            outputArea.find('.Wikiplus-Banner').html(_('Edit submitted'));
+                            outputArea.fadeIn(100);
                         })
-                    }).catch(()=>{
-                        console.log('OAO');
+                    }).catch((e)=>{
+                        outputArea.fadeOut(100, ()=>{
+                            outputArea.find('.Wikiplus-Banner').css('background', 'rgba(218, 142, 167, 0.65)');
+                            outputArea.find('.Wikiplus-Banner').html(e);
+                            outputArea.fadeIn(100);
+                        })
                     })
                 })
             }
@@ -337,7 +344,7 @@ class CoreConfig {
         let modulesInput = $(`<textarea id="wikiplus-config-it-modules"></textarea>`)
             .val(modulesConfig.join(", "));
         boxContent.append(
-            $(`<p><b>${_("Loaded Modules") }</b>:<br>${_("Type comma-saparated module names here.") }</p>`)
+            $(`<p><b>${_("Loaded Modules") }</b>:<br>${_("Type comma-separated module names here.") }</p>`)
                 .append(modulesInput)
         );
 
@@ -423,9 +430,9 @@ class CoreConfig {
         }).catch(res=> {
             let errorInfo = "";
             switch (res) {
-                case "invaild":
+                case "invalid":
                 case "cannotparse":
-                    errorInfo = _("Saved configuration on server is invaild.");
+                    errorInfo = _("Saved configuration on server is invalid.");
                     break;
                 case "empty":
                     errorInfo = _("Can not find any configuration for you on this wiki.");
@@ -445,7 +452,7 @@ class CoreConfig {
                         if (config.updatetime) {
                             res(config);
                         } else {
-                            rej("invaild");
+                            rej("invalid");
                         }
                     } catch (err) {
                         rej("cannotparse");
