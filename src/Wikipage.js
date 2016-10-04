@@ -43,7 +43,10 @@ export class Wikipage {
     }
 
     /**
-     * 修改本页面内容
+     * 修改页面内容
+     * @param {string} content
+     * @param {object} config
+     * @returns {Promise}
      */
     setContent(content, config = {}) {
         return new Promise((res, rej) => {
@@ -55,14 +58,16 @@ export class Wikipage {
                     "text": content
                 }, config)).then(data=> {
                     res(data);
-                });
+                }).catch(e => {
+
+                })
             });
         });
     }
 
     /**
      * 获得当前页面的WikiText
-     * @param section
+     * @param {string} section
      * @param {string} revision (可选)修订版本
      */
     getWikiText(section = 'page', revision = undefined) {

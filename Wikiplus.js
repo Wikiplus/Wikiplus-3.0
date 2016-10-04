@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-09-30
+ * 2016-10-04
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -87,7 +87,10 @@ var Wikipage = exports.Wikipage = function () {
         }
 
         /**
-         * 修改本页面内容
+         * 修改页面内容
+         * @param {string} content
+         * @param {object} config
+         * @returns {Promise}
          */
 
     }, {
@@ -106,14 +109,14 @@ var Wikipage = exports.Wikipage = function () {
                         "text": content
                     }, config)).then(function (data) {
                         res(data);
-                    });
+                    }).catch(function (e) {});
                 });
             });
         }
 
         /**
          * 获得当前页面的WikiText
-         * @param section
+         * @param {string} section
          * @param {string} revision (可选)修订版本
          */
 
@@ -198,6 +201,8 @@ var _i18n2 = _interopRequireDefault(_i18n);
 
 var _version = require('./version');
 
+var _log = require('./log');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -205,15 +210,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var API = exports.API = function () {
     function API() {
         _classCallCheck(this, API);
+
+        this.Log = new _log.Log();
     }
+    /**
+     * 返回API地址
+     * @return {string} API API地址
+     */
+
 
     _createClass(API, null, [{
         key: 'getAPIURL',
-
-        /**
-         * 返回API地址
-         * @return {string} API API地址
-         */
         value: function getAPIURL() {
             return location.protocol + '//' + location.host + window.mw.config.values.wgScriptPath + '/api.php';
         }
@@ -242,11 +249,11 @@ var API = exports.API = function () {
     }, {
         key: 'getUsername',
         value: function getUsername() {
-            var getUserid = window.mw.user.id;
-            if (getUserid === undefined) {
+            var getUserId = window.mw.user.id;
+            if (getUserId === undefined) {
                 throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
             } else {
-                return getUserid();
+                return getUserId();
             }
         }
 
@@ -258,6 +265,7 @@ var API = exports.API = function () {
     }, {
         key: 'getEditToken',
         value: function getEditToken(title) {
+            var self = this;
             return new Promise(function (resolve, reject) {
                 if (window.mw.user.tokens.get('editToken') && window.mw.user.tokens.get('editToken') !== '+\\') {
                     resolve(window.mw.user.tokens.get('editToken'));
@@ -276,11 +284,13 @@ var API = exports.API = function () {
                             if (data.query && data.query.tokens && data.query.tokens.csrftoken && data.query.tokens.csrftoken !== '+\\') {
                                 resolve(data.query.tokens.csrftoken);
                             } else {
-                                reject(new Error('Fail to get the EditToken'));
+                                self.Log.error('fail_to_get_edittoken');
+                                reject((0, _i18n2.default)('fail_to_get_edittoken'));
                             }
                         },
                         error: function error(e) {
-                            reject(new Error('Fail to get the EditToken'));
+                            self.Log.error('fail_to_get_edittoken');
+                            reject((0, _i18n2.default)('fail_to_get_edittoken'));
                         }
                     });
                 }
@@ -365,6 +375,7 @@ var API = exports.API = function () {
 
             var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
+            var self = this;
             return new Promise(function (resolve, reject) {
                 $.ajax({
                     type: "POST",
@@ -381,39 +392,29 @@ var API = exports.API = function () {
                             } else {
                                 if (data.edit.code) {
                                     //防滥用过滤器
-                                    reject(new Error('hit_abusefilter', (0, _i18n2.default)('hit_abusefilter') + ':' + data.edit.info.replace('/Hit AbuseFilter: /ig', '') + '<br><small>' + data.edit.warning + '</small>'));
+                                    self.Log.error('hit_abusefilter');
+                                    reject((0, _i18n2.default)('hit_abusefilter') + ':' + data.edit.info.replace('/Hit AbuseFilter: /ig', '') + '<br><small>' + data.edit.warning + '</small>');
                                 } else {
-                                    reject(new Error('unknown_edit_error'));
+                                    self.Log.error('unknown_edit_error');
+                                    reject((0, _i18n2.default)('unknown_edit_error'));
                                 }
                             }
+                        } else if (data && data.error && data.error.code) {
+                            self.Log.error(data.error.code);
+                            reject((0, _i18n2.default)(data.error.code));
+                        } else if (data.code) {
+                            self.Log.error(data.code);
+                            reject((0, _i18n2.default)(data.code));
+                        } else {
+                            self.Log.error('unknown_edit_error');
+                            reject((0, _i18n2.default)('unknown_edit_error'));
                         }
-                        // 一会儿再回来处理这里的错误。
-                        else if (data && data.error && data.error.code) {} else if (data.code) {} else {}
                     },
                     error: function error(e) {
-                        reject(new Error('Fail to edit this page due to network reasons.'));
+                        self.Log.error('network_edit_error');
+                        reject((0, _i18n2.default)('network_edit_error'));
                     }
                 });
-            });
-        }
-
-        /**
-         * 编辑段落
-         * @param {object} config
-         */
-
-    }, {
-        key: 'editSection',
-        value: function editSection(config) {
-            return this.edit({
-                "title": config.title,
-                "content": config.content,
-                "editToken": config.editToken,
-                "timeStamp": config.timeStamp,
-                "summary": config.summary,
-                "addtionalConfig": {
-                    "section": config.section
-                }
             });
         }
 
@@ -537,7 +538,7 @@ var API = exports.API = function () {
     return API;
 }();
 
-},{"./i18n":4,"./version":11}],3:[function(require,module,exports){
+},{"./i18n":4,"./log":5,"./version":11}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -837,7 +838,9 @@ var Wikiplus = exports.Wikiplus = function () {
                         });
 
                         options.page.setContent(wikiText, additionalConfig).then(function () {
-                            outputArea.html();
+                            outputArea.fadeOut(100, function () {
+                                outputArea.html((0, _i18n2.default)('edit_success', new Date().valueOf() - timer)).fadeIn(100);
+                            });
                         }).catch(function () {
                             console.log('OAO');
                         });

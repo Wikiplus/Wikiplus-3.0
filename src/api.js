@@ -3,8 +3,12 @@
  */
 import _ from './i18n'
 import {Version} from './version'
+import {Log} from './log'
 
 export class API {
+    constructor(){
+        this.Log = new Log();
+    }
     /**
      * 返回API地址
      * @return {string} API API地址
@@ -32,12 +36,12 @@ export class API {
      * @return {string} username 当前登录用户名
      */
     static getUsername() {
-        let getUserid = window.mw.user.id;
-        if (getUserid === undefined) {
+        let getUserId = window.mw.user.id;
+        if (getUserId === undefined) {
             throw new Error("Fail to get the title of this page."); // 这错误也能触发 运气很好
         }
         else {
-            return getUserid();
+            return getUserId();
         }
     }
 
@@ -46,6 +50,7 @@ export class API {
      * @return Promise
      */
     static getEditToken(title) {
+        let self = this;
         return new Promise((resolve, reject) => {
             if (window.mw.user.tokens.get('editToken') && window.mw.user.tokens.get('editToken') !== '+\\') {
                 resolve(window.mw.user.tokens.get('editToken'));
@@ -66,11 +71,13 @@ export class API {
                             resolve(data.query.tokens.csrftoken);
                         }
                         else {
-                            reject(new Error('Fail to get the EditToken'));
+                            self.Log.error('fail_to_get_edittoken');
+                            reject(_('fail_to_get_edittoken'));
                         }
                     },
                     error: (e) => {
-                        reject(new Error('Fail to get the EditToken'));
+                        self.Log.error('fail_to_get_edittoken');
+                        reject(_('fail_to_get_edittoken'));
                     }
                 })
             }
@@ -145,6 +152,7 @@ export class API {
      * @param {object} config
      */
     static edit(config = {}) {
+        let self = this;
         return new Promise((resolve, reject) => {
             $.ajax({
                 type: "POST",
@@ -162,43 +170,34 @@ export class API {
                         else {
                             if (data.edit.code) {
                                 //防滥用过滤器
-                                reject(new Error('hit_abusefilter', `${_('hit_abusefilter') }:${data.edit.info.replace('/Hit AbuseFilter: /ig', '') }<br><small>${data.edit.warning}</small>`));
+                                self.Log.error('hit_abusefilter');
+                                reject(`${_('hit_abusefilter') }:${data.edit.info.replace('/Hit AbuseFilter: /ig', '') }<br><small>${data.edit.warning}</small>`);
                             }
                             else {
-                                reject(new Error('unknown_edit_error'));
+                                self.Log.error('unknown_edit_error');
+                                reject(_('unknown_edit_error'));
                             }
                         }
                     }
-                    // 一会儿再回来处理这里的错误。
                     else if (data && data.error && data.error.code) {
+                        self.Log.error(data.error.code);
+                        reject(_(data.error.code));
                     }
                     else if (data.code) {
+                        self.Log.error(data.code);
+                        reject(_(data.code));
                     }
                     else {
+                        self.Log.error('unknown_edit_error');
+                        reject(_('unknown_edit_error'));
                     }
                 },
                 error: (e) => {
-                    reject(new Error('Fail to edit this page due to network reasons.'))
+                    self.Log.error('network_edit_error');
+                    reject(_('network_edit_error'));
                 }
             })
         })
-    }
-
-    /**
-     * 编辑段落
-     * @param {object} config
-     */
-    static editSection(config) {
-        return this.edit({
-            "title": config.title,
-            "content": config.content,
-            "editToken": config.editToken,
-            "timeStamp": config.timeStamp,
-            "summary": config.summary,
-            "addtionalConfig": {
-                "section": config.section
-            }
-        });
     }
 
     /**

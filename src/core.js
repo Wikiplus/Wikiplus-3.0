@@ -275,7 +275,9 @@ export class Wikiplus {
                     });
 
                     options.page.setContent(wikiText, additionalConfig).then(()=>{
-                        outputArea.html()
+                        outputArea.fadeOut(100, ()=>{
+                            outputArea.html(_('edit_success', new Date().valueOf() - timer)).fadeIn(100);
+                        })
                     }).catch(()=>{
                         console.log('OAO');
                     })
