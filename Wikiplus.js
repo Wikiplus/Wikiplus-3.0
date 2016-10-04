@@ -430,8 +430,8 @@ var API = exports.API = function () {
         value: function redirectTo(target, editToken, config) {
             return this.edit($.extend({
                 "title": window.mw.config.values.wgPageName,
-                "content": '#REDIRECT [[' + target + ']]',
-                "editToken": editToken,
+                "text": '#REDIRECT [[' + target + ']]',
+                "token": editToken,
                 "summary": (0, _i18n2.default)('Redirect [[' + window.mw.config.values.wgPageName + ']] to [[' + target + ']] via Wikiplus')
             }, config));
         }
@@ -448,8 +448,8 @@ var API = exports.API = function () {
         value: function redirectFrom(origin, editToken, config) {
             return this.edit($.extend({
                 "title": origin,
-                "content": '#REDIRECT [[' + window.mw.config.values.wgPageName + ']]',
-                "editToken": editToken,
+                "text": '#REDIRECT [[' + window.mw.config.values.wgPageName + ']]',
+                "token": editToken,
                 "summary": (0, _i18n2.default)('Redirect [[' + origin + ']] to [[' + window.mw.config.values.wgPageName + ']] via Wikiplus')
             }, config));
         }
@@ -957,7 +957,7 @@ var CoreConfig = function () {
             config["updatetime"] = new Date().getTime();
             var configString = JSON.stringify(config);
             var configPage = new _Wikipage.Wikipage('User:' + _api.API.getUsername() + '/Wikiplus-config.json');
-            configPage.setContent({ content: configString, summary: "Update Config via Wikiplus" }).then(function (data) {
+            configPage.setContent(configString, { summary: "Update Config via Wikiplus" }).then(function (data) {
                 _this5.notice.create.success((0, _i18n2.default)("Save config to Server successfully."));
                 _ui.UI.closeBox();
             }).catch(function (e) {

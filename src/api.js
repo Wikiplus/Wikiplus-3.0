@@ -209,8 +209,8 @@ export class API {
     static redirectTo(target, editToken, config) {
         return this.edit($.extend({
             "title": window.mw.config.values.wgPageName,
-            "content": `#REDIRECT [[${target}]]`,
-            "editToken": editToken,
+            "text": `#REDIRECT [[${target}]]`,
+            "token": editToken,
             "summary": _(`Redirect [[${window.mw.config.values.wgPageName}]] to [[${target}]] via Wikiplus`),
         }, config));
     }
@@ -224,8 +224,8 @@ export class API {
     static redirectFrom(origin, editToken, config) {
         return this.edit($.extend({
             "title": origin,
-            "content": `#REDIRECT [[${window.mw.config.values.wgPageName}]]`,
-            "editToken": editToken,
+            "text": `#REDIRECT [[${window.mw.config.values.wgPageName}]]`,
+            "token": editToken,
             "summary": _(`Redirect [[${origin}]] to [[${window.mw.config.values.wgPageName}]] via Wikiplus`)
         }, config));
     }

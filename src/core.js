@@ -385,7 +385,7 @@ class CoreConfig {
         config["updatetime"] = (new Date()).getTime();
         let configString = JSON.stringify(config);
         let configPage = new Wikipage(`User:${API.getUsername() }/Wikiplus-config.json`);
-        configPage.setContent({content: configString, summary: "Update Config via Wikiplus"}).then(data=> {
+        configPage.setContent(configString, {summary: "Update Config via Wikiplus"}).then(data=> {
             this.notice.create.success(_("Save config to Server successfully."));
             UI.closeBox();
         }).catch(e=> {
