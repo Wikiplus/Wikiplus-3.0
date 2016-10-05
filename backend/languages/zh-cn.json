@@ -1,6 +1,6 @@
 {
     "language": "zh-cn",
-    "update_time": "2016-10-04 21:14:58",
+    "update_time": "2016-10-05 15:11:22",
     "defaultScope": {
 
 "Allow":
@@ -99,8 +99,35 @@
 "back":
 "返回",
 
+"badtoken":
+"非法的编辑权标",
+
+"blocked":
+"已被封禁",
+
+"cantcreate":
+"无创建页面权限",
+
+"cascadeprotected":
+"页面被级联保护",
+
+"common_edit_error":
+"编辑失败($1)",
+
+"contenttoobig":
+"内容过长",
+
+"customcssprotected":
+"不允许编辑用户CSS页面",
+
+"customjsprotected":
+"不允许编辑用户JS页面",
+
 "default_summary":
 " // Edit via Wikiplus",
+
+"editconflict":
+"编辑冲突，请勿惊慌。请对比该页面的最新版本和下方编辑框中的内容，手工修正后刷新页面再次提交。",
 
 "fail_to_get_edittoken":
 "无法获得编辑权标",
@@ -114,6 +141,9 @@
 "hit_abusefilter":
 "触发防滥用过滤器",
 
+"invalidtitle":
+"非法的标题",
+
 "loading_preview":
 "正在载入预览",
 
@@ -123,8 +153,23 @@
 "network_edit_error":
 "由于网络原因编辑失败",
 
+"noedit":
+"无编辑权限",
+
+"pagedeleted":
+"编辑时页面被删除",
+
 "preview":
 "预览",
+
+"protectedtitle":
+"该标题被保护，不允许创建",
+
+"ratelimited":
+"操作速率太快，请稍后重试",
+
+"spamdetected":
+"内容被SPAM过滤器拦截",
 
 "submit":
 "提交",
@@ -134,6 +179,9 @@
 
 "summary_placeholder":
 "编辑摘要",
+
+"summaryrequired":
+"编辑摘要不能为空",
 
 "unknown_edit_error":
 "未知的编辑错误"

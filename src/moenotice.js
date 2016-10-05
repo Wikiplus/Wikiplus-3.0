@@ -16,7 +16,7 @@ export function MoeNotification() {
         self.bind();
         self.clear();
         callback($("#MoeNotification").find('.MoeNotification-notice').last());
-    }
+    };
     this.create = {
         success: function (text, callback = () => {
         }) {
@@ -41,7 +41,7 @@ export function MoeNotification() {
         else {
             return false;
         }
-    }
+    };
     this.empty = function (f) {
         $(".MoeNotification-notice").each(function (i) {
             if ($.isFunction(f)) {
@@ -56,12 +56,12 @@ export function MoeNotification() {
                 })
             }
         })
-    }
+    };
     this.bind = function () {
         $(".MoeNotification-notice").mouseover(function () {
             self.slideLeft($(this));
         });
-    }
+    };
     window.slideLeft = this.slideLeft = function (object, speed) {
         object.css('position', 'relative');
         object.animate({
@@ -72,12 +72,12 @@ export function MoeNotification() {
                     $(this).remove();
                 });
             });
-    }
+    };
     this.init = function () {
         $("body").append(
             $('<div>').attr('id', 'MoeNotification')
         );
-    }
+    };
     if (!($("#MoeNotification").length > 0)) {
         this.init();
     }

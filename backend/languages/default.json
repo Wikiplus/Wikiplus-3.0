@@ -1,6 +1,6 @@
 {
     "language": "default",
-    "update_time": "2016-10-04 21:14:58",
+    "update_time": "2016-10-05 15:11:22",
     "defaultScope": {
 
 "Allow":
@@ -99,7 +99,34 @@
 "back":
 "<Translate Here>",
 
+"badtoken":
+"<Translate Here>",
+
+"blocked":
+"<Translate Here>",
+
+"cantcreate":
+"<Translate Here>",
+
+"cascadeprotected":
+"<Translate Here>",
+
+"common_edit_error":
+"<Translate Here>",
+
+"contenttoobig":
+"<Translate Here>",
+
+"customcssprotected":
+"<Translate Here>",
+
+"customjsprotected":
+"<Translate Here>",
+
 "default_summary":
+"<Translate Here>",
+
+"editconflict":
 "<Translate Here>",
 
 "fail_to_get_edittoken":
@@ -114,6 +141,9 @@
 "hit_abusefilter":
 "<Translate Here>",
 
+"invalidtitle":
+"<Translate Here>",
+
 "loading_preview":
 "<Translate Here>",
 
@@ -123,7 +153,22 @@
 "network_edit_error":
 "<Translate Here>",
 
+"noedit":
+"<Translate Here>",
+
+"pagedeleted":
+"<Translate Here>",
+
 "preview":
+"<Translate Here>",
+
+"protectedtitle":
+"<Translate Here>",
+
+"ratelimited":
+"<Translate Here>",
+
+"spamdetected":
 "<Translate Here>",
 
 "submit":
@@ -133,6 +178,9 @@
 "<Translate Here>",
 
 "summary_placeholder":
+"<Translate Here>",
+
+"summaryrequired":
 "<Translate Here>",
 
 "unknown_edit_error":

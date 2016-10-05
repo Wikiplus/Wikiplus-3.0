@@ -4,10 +4,10 @@
 import _ from './i18n'
 import {Version} from './version'
 import {Log} from './log'
+let Logger = new Log();
 
 export class API {
     constructor(){
-        this.Log = new Log();
     }
     /**
      * 返回API地址
@@ -71,12 +71,12 @@ export class API {
                             resolve(data.query.tokens.csrftoken);
                         }
                         else {
-                            self.Log.error('fail_to_get_edittoken');
+                            Logger.error('fail_to_get_edittoken');
                             reject(_('fail_to_get_edittoken'));
                         }
                     },
                     error: (e) => {
-                        self.Log.error('fail_to_get_edittoken');
+                        Logger.error('fail_to_get_edittoken');
                         reject(_('fail_to_get_edittoken'));
                     }
                 })
@@ -170,30 +170,47 @@ export class API {
                         else {
                             if (data.edit.code) {
                                 //防滥用过滤器
-                                self.Log.error('hit_abusefilter');
+                                Logger.error('hit_abusefilter');
                                 reject(`${_('hit_abusefilter') }:${data.edit.info.replace('/Hit AbuseFilter: /ig', '') }<br><small>${data.edit.warning}</small>`);
                             }
                             else {
-                                self.Log.error('unknown_edit_error');
+                                Logger.error('unknown_edit_error');
                                 reject(_('unknown_edit_error'));
                             }
                         }
                     }
                     else if (data && data.error && data.error.code) {
-                        self.Log.error(data.error.code);
-                        reject(_(data.error.code));
+                        let errorInfo = {
+                            'protectedtitle' : _('protectedtitle'),
+                            'cantcreate': _('cantcreate'),
+                            'spamdetected': _('spamdetected'),
+                            'contenttoobig': _('contenttoobig'),
+                            'noedit': _('noedit'),
+                            'pagedeleted': _('pagedeleted'),
+                            'editconflict': _('editconflict'),
+                            'badtoken': _('badtoken'),
+                            'invalidtitle': _('invalidtitle'),
+                            'summaryrequired': _('summaryrequired'),
+                            'customcssprotected': _('customcssprotected'),
+                            'customjsprotected': _('customjsprotected'),
+                            'cascadeprotected': _('cascadeprotected'),
+                            'blocked': _('blocked'),
+                            'ratelimited': _('ratelimited')
+                        }[data.error.code] || _('common_edit_error').replace(/\$1/ig, data.error.code);
+                        Logger.error(data.error.code);
+                        reject(errorInfo);
                     }
                     else if (data.code) {
-                        self.Log.error(data.code);
+                        Logger.error(data.code);
                         reject(_(data.code));
                     }
                     else {
-                        self.Log.error('unknown_edit_error');
+                        Logger.error('unknown_edit_error');
                         reject(_('unknown_edit_error'));
                     }
                 },
                 error: (e) => {
-                    self.Log.error('network_edit_error');
+                    Logger.error('network_edit_error');
                     reject(_('network_edit_error'));
                 }
             })
@@ -258,6 +275,10 @@ export class API {
                     console.timeEnd('获得页面文本耗时');
                 },
                 error: (e) => {
+                    if (e.status === 404){
+                        // 大可能是空页面
+                        resolve(_('create_page_tip'));
+                    }
                     reject(new Error('Fail to get the WikiText of this page.'));
                 }
             })

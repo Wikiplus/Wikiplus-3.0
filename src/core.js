@@ -172,7 +172,9 @@ export class Wikiplus {
                 // 编辑目标并不是本页面
                 page = new Wikipage(editSetting.target);
             }
+            self.notice.create.success(_('loading'));
             page.getWikiText(editSetting.sectionNumber, editSetting.revision).then(wikiText=> {
+                self.notice.empty();
                 let UISettings = {
                     "content": wikiText,
                     "page": page,
@@ -186,6 +188,8 @@ export class Wikiplus {
                     UISettings.summary = `/* ${editSetting.sectionName} */ ${_('default_summary')}`;
                 }
                 self.generateQuickEditUI(UISettings);
+            }).catch(()=>{
+                self.notice.error(_('load_wikitext_failed'));
             })
         })
     }
@@ -271,6 +275,13 @@ export class Wikiplus {
                     $('#Wikiplus-Quickedit-Submit,#Wikiplus-Quickedit,#Wikiplus-Quickedit-Preview-Submit').attr('disabled', 'disabled');
                     $('body').animate({ scrollTop: heightBefore }, 200);
 
+                    // 关闭网页确认
+                    $('#Wikiplus-Quickedit').keydown(function () {
+                        window.onclose = window.onbeforeunload = function () {
+                            return `${i18n('onclose_confirm')}`;
+                        }
+                    });
+
                     outputArea.fadeOut(100, ()=> {
                         outputArea.html('').append(onEdit).fadeIn(100);
                     });
@@ -280,13 +291,19 @@ export class Wikiplus {
                             outputArea.find('.Wikiplus-Banner').css('background', 'rgba(6, 239, 92, 0.44)');
                             outputArea.find('.Wikiplus-Banner').html(_('Edit submitted'));
                             outputArea.fadeIn(100);
-                        })
+                        });
+                        window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
+                        setTimeout(function () {
+                            location.reload();
+                        }, 500);
+
                     }).catch((e)=>{
                         outputArea.fadeOut(100, ()=>{
                             outputArea.find('.Wikiplus-Banner').css('background', 'rgba(218, 142, 167, 0.65)');
                             outputArea.find('.Wikiplus-Banner').html(e);
                             outputArea.fadeIn(100);
-                        })
+                        });
+                        window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
                     })
                 })
             }

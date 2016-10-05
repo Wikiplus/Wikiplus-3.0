@@ -59,7 +59,7 @@ export class Wikipage {
                 }, config)).then(data=> {
                     res(data);
                 }).catch(e => {
-
+                    rej(e);
                 })
             });
         });
