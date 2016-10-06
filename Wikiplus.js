@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-10-05
+ * 2016-10-06
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -411,6 +411,7 @@ var API = exports.API = function () {
                                 'pagedeleted': (0, _i18n2.default)('pagedeleted'),
                                 'editconflict': (0, _i18n2.default)('editconflict'),
                                 'badtoken': (0, _i18n2.default)('badtoken'),
+                                'notoken': (0, _i18n2.default)('notoken'),
                                 'invalidtitle': (0, _i18n2.default)('invalidtitle'),
                                 'summaryrequired': (0, _i18n2.default)('summaryrequired'),
                                 'customcssprotected': (0, _i18n2.default)('customcssprotected'),
@@ -575,9 +576,9 @@ var _createClass = function () { function defineProperties(target, props) { for 
  */
 
 
-var _i18n2 = require('./i18n');
+var _i18n = require('./i18n');
 
-var _i18n3 = _interopRequireDefault(_i18n2);
+var _i18n2 = _interopRequireDefault(_i18n);
 
 var _version = require('./version');
 
@@ -634,20 +635,20 @@ var Wikiplus = exports.Wikiplus = function () {
             var isInstall = this.coreConfig.isInstall;
             if (isInstall === "True") {
                 //加载并初始化i18n
-                var _i18n = new _i18n2.I18n(this.coreConfig.language);
-                _i18n.initi18n();
+                var i18n = new _i18n.I18n(this.coreConfig.language);
+                i18n.initi18n();
                 //Updated Case
                 if (this.coreConfig.Version !== _version.Version.VERSION) {
                     this.notice.create.success("Wikiplus-3.0 v" + _version.Version.VERSION);
                     this.notice.create.success(_version.Version.releaseNote);
                     this.coreConfig.Version = _version.Version.VERSION;
                     //检查语言更新
-                    _i18n.load();
+                    i18n.load();
                 }
             } else {
                 (function () {
                     //首次加载并初始化i18n（使用系统语言）
-                    var i18n = new _i18n2.I18n(window.navigator.language.toLowerCase(), false);
+                    var i18n = new _i18n.I18n(window.navigator.language.toLowerCase(), false);
                     i18n.initi18n();
                     //安装
                     var install = function install() {
@@ -656,7 +657,7 @@ var Wikiplus = exports.Wikiplus = function () {
                         self.coreConfig.StartUseAt = '' + new Date().valueOf();
                         self.coreConfig.StartEditCount = mw.config.values.wgUserEditCount;
                         self.coreConfig.language = window.navigator.language.toLowerCase();
-                        self.notice.create.success((0, _i18n3.default)('Wikiplus installed, enjoy it'));
+                        self.notice.create.success((0, _i18n2.default)('Wikiplus installed, enjoy it'));
                     };
 
                     _this.coreConfig.loadConfigHelper().then(function (data) {
@@ -665,9 +666,9 @@ var Wikiplus = exports.Wikiplus = function () {
                         install();
                     }).catch(function (err) {
                         _ui.UI.createDialog({
-                            title: (0, _i18n3.default)('Install Wikiplus'),
-                            info: (0, _i18n3.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').seti18n(mw.config.values.wgSiteName),
-                            mode: [{ id: "Yes", text: (0, _i18n3.default)("Yes"), res: true }, { id: "No", text: (0, _i18n3.default)("No"), res: false }]
+                            title: (0, _i18n2.default)('Install Wikiplus'),
+                            info: (0, _i18n2.default)('Do you allow WikiPlus to collect insensitive data to help us develop WikiPlus and improve suggestion to this site: $1 ?').seti18n(mw.config.values.wgSiteName),
+                            mode: [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }]
                         }).then(function (res) {
                             console.log("用户选择：" + (res ? "接受" : "拒绝"));
                             _this.coreConfig.SendStatistics = res ? "True" : "False";
@@ -702,7 +703,7 @@ var Wikiplus = exports.Wikiplus = function () {
         value: function generateQuickEditButtons() {
             // 顶部按钮
             var self = this;
-            var topBtn = $('<li>').attr('id', 'Wikiplus-Edit-TopBtn').append($('<span>').append($('<a>').attr('href', 'javascript:void(0)').text('' + (0, _i18n3.default)('QuickEdit')))).data({
+            var topBtn = $('<li>').attr('id', 'Wikiplus-Edit-TopBtn').append($('<span>').append($('<a>').attr('href', 'javascript:void(0)').text('' + (0, _i18n2.default)('QuickEdit')))).data({
                 sectionNumber: 'page',
                 target: this.API.getThisPageName(),
                 revision: window.mw.config.values.wgRevisionId
@@ -715,7 +716,7 @@ var Wikiplus = exports.Wikiplus = function () {
             // 段落按钮
             if ($('.mw-editsection').length > 0) {
                 //段落快速编辑按钮
-                var sectionBtn = $('<span>').append($('<span>').attr('id', 'mw-editsection-bracket').text('[')).append($('<a>').addClass('Wikiplus-Edit-SectionBtn').attr('href', 'javascript:void(0)').text((0, _i18n3.default)('QuickEdit'))).append($('<span>').attr('id', 'mw-editsection-bracket').text(']'));
+                var sectionBtn = $('<span>').append($('<span>').attr('id', 'mw-editsection-bracket').text('[')).append($('<a>').addClass('Wikiplus-Edit-SectionBtn').attr('href', 'javascript:void(0)').text((0, _i18n2.default)('QuickEdit'))).append($('<span>').attr('id', 'mw-editsection-bracket').text(']'));
                 $('.mw-editsection').each(function (i) {
                     try {
                         var editURL = $(this).find("a").last().attr('href');
@@ -759,7 +760,7 @@ var Wikiplus = exports.Wikiplus = function () {
                     // 编辑目标并不是本页面
                     page = new _Wikipage.Wikipage(editSetting.target);
                 }
-                self.notice.create.success((0, _i18n3.default)('loading'));
+                self.notice.create.success((0, _i18n2.default)('loading'));
                 page.getWikiText(editSetting.sectionNumber, editSetting.revision).then(function (wikiText) {
                     self.notice.empty();
                     var UISettings = {
@@ -769,14 +770,14 @@ var Wikiplus = exports.Wikiplus = function () {
                         "sectionNumber": editSetting.sectionNumber
                     };
                     if (editSetting.revision !== window.mw.config.values.wgCurRevisionId) {
-                        UISettings.title = (0, _i18n3.default)('QuickEdit') + ' // ' + (0, _i18n3.default)('history_edit_warning');
+                        UISettings.title = (0, _i18n2.default)('QuickEdit') + ' // ' + (0, _i18n2.default)('history_edit_warning');
                     }
                     if (editSetting.sectionName) {
-                        UISettings.summary = '/* ' + editSetting.sectionName + ' */ ' + (0, _i18n3.default)('default_summary');
+                        UISettings.summary = '/* ' + editSetting.sectionName + ' */ ' + (0, _i18n2.default)('default_summary');
                     }
                     self.generateQuickEditUI(UISettings);
                 }).catch(function () {
-                    self.notice.error((0, _i18n3.default)('load_wikitext_failed'));
+                    self.notice.error((0, _i18n2.default)('load_wikitext_failed'));
                 });
             });
         }
@@ -792,18 +793,18 @@ var Wikiplus = exports.Wikiplus = function () {
 
             var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-            var title = options.title || (0, _i18n3.default)('QuickEdit');
-            var summary = options.summary || (0, _i18n3.default)('default_summary');
+            var title = options.title || (0, _i18n2.default)('QuickEdit');
+            var summary = options.summary || (0, _i18n2.default)('default_summary');
             var content = options.content || '';
 
-            var backBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Back').addClass('Wikiplus-Btn').text('' + (0, _i18n3.default)('back')); //返回按钮
-            var jumpBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Jump').addClass('Wikiplus-Btn').append($('<a>').attr('href', '#Wikiplus-Quickedit').text('' + (0, _i18n3.default)('goto_editbox'))); //到编辑框
+            var backBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Back').addClass('Wikiplus-Btn').text('' + (0, _i18n2.default)('back')); //返回按钮
+            var jumpBtn = $('<span>').attr('id', 'Wikiplus-Quickedit-Jump').addClass('Wikiplus-Btn').append($('<a>').attr('href', '#Wikiplus-Quickedit').text('' + (0, _i18n2.default)('goto_editbox'))); //到编辑框
             var inputBox = $('<textarea>').attr('id', 'Wikiplus-Quickedit').val(content); //主编辑框
             var previewBox = $('<div>').attr('id', 'Wikiplus-Quickedit-Preview-Output'); //预览输出
-            var summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', '' + (0, _i18n3.default)('summary_placeholder')).val(summary); //编辑摘要输入
-            var editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text((0, _i18n3.default)('submit') + '(Ctrl+S)'); //提交按钮
-            var previewSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Preview-Submit').text('' + (0, _i18n3.default)('preview')); //预览按钮
-            var isMinorEdit = $('<div>').append($('<input>').attr({ 'type': 'checkbox', 'id': 'Wikiplus-Quickedit-MinorEdit' })).append($('<label>').attr('for', 'Wikiplus-Quickedit-MinorEdit').text((0, _i18n3.default)('mark_minoredit') + '(Ctrl+Shift+S)')).css({ 'margin': '5px 5px 5px -3px', 'display': 'inline' });
+            var summaryBox = $('<input>').attr('id', 'Wikiplus-Quickedit-Summary-Input').attr('placeholder', '' + (0, _i18n2.default)('summary_placeholder')).val(summary); //编辑摘要输入
+            var editSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Submit').text((0, _i18n2.default)('submit') + '(Ctrl+S)'); //提交按钮
+            var previewSubmitBtn = $('<button>').attr('id', 'Wikiplus-Quickedit-Preview-Submit').text('' + (0, _i18n2.default)('preview')); //预览按钮
+            var isMinorEdit = $('<div>').append($('<input>').attr({ 'type': 'checkbox', 'id': 'Wikiplus-Quickedit-MinorEdit' })).append($('<label>').attr('for', 'Wikiplus-Quickedit-MinorEdit').text((0, _i18n2.default)('mark_minoredit') + '(Ctrl+Shift+S)')).css({ 'margin': '5px 5px 5px -3px', 'display': 'inline' });
             //DOM定义结束
             var editBody = $('<div>').append(backBtn, jumpBtn, previewBox, inputBox, summaryBox, $('<br>'), isMinorEdit, editSubmitBtn, previewSubmitBtn);
 
@@ -823,7 +824,7 @@ var Wikiplus = exports.Wikiplus = function () {
                     });
 
                     // 预览
-                    var onPreload = $('<div>').addClass('Wikiplus-Banner').text('' + (0, _i18n3.default)('loading_preview'));
+                    var onPreload = $('<div>').addClass('Wikiplus-Banner').text('' + (0, _i18n2.default)('loading_preview'));
                     $('#Wikiplus-Quickedit-Preview-Submit').click(function () {
                         var wikiText = $('#Wikiplus-Quickedit').val();
                         $(this).attr('disabled', 'disabled');
@@ -846,7 +847,7 @@ var Wikiplus = exports.Wikiplus = function () {
                         var wikiText = $('#Wikiplus-Quickedit').val();
                         var summary = $('#Wikiplus-Quickedit-Summary-Input').val();
                         var timer = new Date().valueOf();
-                        var onEdit = $('<div>').addClass('Wikiplus-Banner').text('' + (0, _i18n3.default)('submitting_edit'));
+                        var onEdit = $('<div>').addClass('Wikiplus-Banner').text('' + (0, _i18n2.default)('submitting_edit'));
 
                         var additionalConfig = {
                             'summary': summary
@@ -864,7 +865,7 @@ var Wikiplus = exports.Wikiplus = function () {
                         // 关闭网页确认
                         $('#Wikiplus-Quickedit').keydown(function () {
                             window.onclose = window.onbeforeunload = function () {
-                                return '' + i18n('onclose_confirm');
+                                return '' + (0, _i18n2.default)('onclose_confirm');
                             };
                         });
 
@@ -875,7 +876,7 @@ var Wikiplus = exports.Wikiplus = function () {
                         options.page.setContent(wikiText, additionalConfig).then(function () {
                             outputArea.fadeOut(100, function () {
                                 outputArea.find('.Wikiplus-Banner').css('background', 'rgba(6, 239, 92, 0.44)');
-                                outputArea.find('.Wikiplus-Banner').html((0, _i18n3.default)('Edit submitted'));
+                                outputArea.find('.Wikiplus-Banner').html((0, _i18n2.default)('Edit submitted'));
                                 outputArea.fadeIn(100);
                             });
                             window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
@@ -888,7 +889,7 @@ var Wikiplus = exports.Wikiplus = function () {
                                 outputArea.find('.Wikiplus-Banner').html(e);
                                 outputArea.fadeIn(100);
                             });
-                            window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
+                            $('#Wikiplus-Quickedit-Submit,#Wikiplus-Quickedit,#Wikiplus-Quickedit-Preview-Submit').removeAttr('disabled');
                         });
                     });
                 }
@@ -917,30 +918,28 @@ var CoreConfig = function () {
         value: function init() {
             var _this3 = this;
 
-            if (_api.API.getThisPageName().substr(5) == _api.API.getUsername()) {
-                _ui.UI.addLinkInToolbox({
-                    name: (0, _i18n3.default)("Wikiplus Config"),
-                    title: (0, _i18n3.default)("Configurations for global Wikiplus."),
-                    callback: function callback() {
-                        _this3.drawConfigBox();
-                    }
-                });
-            }
+            _ui.UI.addLinkInToolbox({
+                name: (0, _i18n2.default)("Wikiplus Config"),
+                title: (0, _i18n2.default)("Configurations for global Wikiplus."),
+                callback: function callback() {
+                    _this3.drawConfigBox();
+                }
+            });
         }
     }, {
         key: 'drawConfigBox',
         value: function drawConfigBox() {
             var _this4 = this;
 
-            var boxContent = $('<div id="wikiplus-config-area"><p>' + (0, _i18n3.default)("You could change Wikiplus settings here. These settings will work on the whole Wiki.") + '</p><br></div>');
+            var boxContent = $('<div id="wikiplus-config-area"><p>' + (0, _i18n2.default)("You could change Wikiplus settings here. These settings will work on the whole Wiki.") + '</p><br></div>');
 
             //语言设置
             var languageInput = $('<input type="text" id="wikiplus-config-it-language">').val(_util.Util.getLocalConfig("language"));
-            boxContent.append($('<p><b>' + (0, _i18n3.default)("Language") + '</b>: </p>').append(languageInput));
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Language") + '</b>: </p>').append(languageInput));
 
             //是否发送统计信息
-            var statInput = $('<label><input type="radio" id="wikiplus-config-ir-stat" value="true" name="wikiplus-config-stat">' + (0, _i18n3.default)("Allow") + '</label>');
-            var noStatInput = $('<label><input name="wikiplus-config-stat" value="false" type="radio" id="wikiplus-config-ir-nostat">' + (0, _i18n3.default)("Disallow") + '</label>');
+            var statInput = $('<label><input type="radio" id="wikiplus-config-ir-stat" value="true" name="wikiplus-config-stat">' + (0, _i18n2.default)("Allow") + '</label>');
+            var noStatInput = $('<label><input name="wikiplus-config-stat" value="false" type="radio" id="wikiplus-config-ir-nostat">' + (0, _i18n2.default)("Disallow") + '</label>');
             if (_util.Util.getLocalConfig("SendStatistics") == "True") {
                 statInput.find("input")[0].checked = true;
                 noStatInput.find("input")[0].checked = false;
@@ -948,7 +947,7 @@ var CoreConfig = function () {
                 statInput.find("input")[0].checked = false;
                 noStatInput.find("input")[0].checked = true;
             }
-            boxContent.append($('<p><b>' + (0, _i18n3.default)("Send Statistics") + '</b>: </p>').append(statInput).append(noStatInput));
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Send Statistics") + '</b>: </p>').append(statInput).append(noStatInput));
 
             //需载入的模块
             var modulesConfig = _util.Util.getLocalConfig("modules", true);
@@ -956,20 +955,20 @@ var CoreConfig = function () {
                 modulesConfig = [];
             }
             var modulesInput = $('<textarea id="wikiplus-config-it-modules"></textarea>').val(modulesConfig.join(", "));
-            boxContent.append($('<p><b>' + (0, _i18n3.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n3.default)("Type comma-separated module names here.") + '</p>').append(modulesInput));
+            boxContent.append($('<p><b>' + (0, _i18n2.default)("Loaded Modules") + '</b>:<br>' + (0, _i18n2.default)("Type comma-separated module names here.") + '</p>').append(modulesInput));
 
             //从服务器恢复设置
-            var loadConfigBtn = $('<input type="button" id="wikiplus-config-btn-loadconfig" value="' + (0, _i18n3.default)("Load Config") + '">');
+            var loadConfigBtn = $('<input type="button" id="wikiplus-config-btn-loadconfig" value="' + (0, _i18n2.default)("Load Config") + '">');
             loadConfigBtn.click(function () {
-                _this4.notice.create.success((0, _i18n3.default)("Checking if had configuration on this wiki."));
+                _this4.notice.create.success((0, _i18n2.default)("Checking if had configuration on this wiki."));
                 _this4.loadConfig();
             });
-            boxContent.append($("<hr>")).append($('<p><b>' + (0, _i18n3.default)("Load Config from server") + '</b>: </p>').append(loadConfigBtn));
+            boxContent.append($("<hr>")).append($('<p><b>' + (0, _i18n2.default)("Load Config from server") + '</b>: </p>').append(loadConfigBtn));
 
             //保存和取消按钮
-            boxContent.append($('<hr><p>' + (0, _i18n3.default)("Your configuration will save at User:$1/Wikiplus-config.json on this wiki.").seti18n(_api.API.getUsername()) + '</p>'));
-            var saveConfigBtn = $('<input type="button" id="wikiplus-config-btn-save" class="Wikiplus-InterBox-Btn" value="' + (0, _i18n3.default)("Save") + '">');
-            var cancelConfigBtn = $('<input type="button" id="wikiplus-config-btn-cancel" class="Wikiplus-InterBox-Btn" value="' + (0, _i18n3.default)("Cancel") + '">');
+            boxContent.append($('<hr><p>' + (0, _i18n2.default)("Your configuration will save at User:$1/Wikiplus-config.json on this wiki.").seti18n(_api.API.getUsername()) + '</p>'));
+            var saveConfigBtn = $('<input type="button" id="wikiplus-config-btn-save" class="Wikiplus-InterBox-Btn" value="' + (0, _i18n2.default)("Save") + '">');
+            var cancelConfigBtn = $('<input type="button" id="wikiplus-config-btn-cancel" class="Wikiplus-InterBox-Btn" value="' + (0, _i18n2.default)("Cancel") + '">');
             cancelConfigBtn.click(function () {
                 _ui.UI.closeBox();
             });
@@ -988,7 +987,7 @@ var CoreConfig = function () {
 
             //显示对话框
             _ui.UI.createBox({
-                title: (0, _i18n3.default)("Wikiplus Config"),
+                title: (0, _i18n2.default)("Wikiplus Config"),
                 content: boxContent
             });
         }
@@ -1004,45 +1003,23 @@ var CoreConfig = function () {
             var configString = JSON.stringify(config);
             var configPage = new _Wikipage.Wikipage('User:' + _api.API.getUsername() + '/Wikiplus-config.json');
             configPage.setContent(configString, { summary: "Update Config via Wikiplus" }).then(function (data) {
-                _this5.notice.create.success((0, _i18n3.default)("Save config to Server successfully."));
+                _this5.notice.create.success((0, _i18n2.default)("Save config to Server successfully."));
                 _ui.UI.closeBox();
             }).catch(function (e) {
-                _this5.notice.create.error((0, _i18n3.default)("Save config to Server failed."));
+                _this5.notice.create.error((0, _i18n2.default)("Save config to Server failed."));
             });
         }
     }, {
         key: 'saveConfigToLocal',
         value: function saveConfigToLocal(config) {
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = config[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var confKey = _step.value;
-
-                    if (CoreConfig.objectiveConfig[confKey]) {
-                        _util.Util.setLocalConfig(confKey, config[confKey], true);
-                    } else {
-                        _util.Util.setLocalConfig(confKey, config[confKey], false);
-                    }
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
+            for (var confKey in config) {
+                if (CoreConfig.objectiveConfig[confKey]) {
+                    _util.Util.setLocalConfig(confKey, config[confKey], true);
+                } else {
+                    _util.Util.setLocalConfig(confKey, config[confKey], false);
                 }
             }
-
-            this.notice.create.success((0, _i18n3.default)("Save config to local successfully."));
+            this.notice.create.success((0, _i18n2.default)("Save config to local successfully."));
         }
     }, {
         key: 'loadConfig',
@@ -1051,9 +1028,9 @@ var CoreConfig = function () {
 
             this.loadConfigHelper().then(function (config) {
                 _ui.UI.createDialog({
-                    info: (0, _i18n3.default)("Find a uploaded configuration of $1. Do you want to import this config now?").seti18n(new Date(config.updatetime).toLocaleString()),
-                    title: (0, _i18n3.default)("Confirm Import"),
-                    mode: [{ id: "Yes", text: (0, _i18n3.default)("Yes"), res: true }, { id: "No", text: (0, _i18n3.default)("No"), res: false }]
+                    info: (0, _i18n2.default)("Find a uploaded configuration of $1. Do you want to import this config now?").seti18n(new Date(config.updatetime).toLocaleString()),
+                    title: (0, _i18n2.default)("Confirm Import"),
+                    mode: [{ id: "Yes", text: (0, _i18n2.default)("Yes"), res: true }, { id: "No", text: (0, _i18n2.default)("No"), res: false }]
                 }).then(function (res) {
                     if (res) {
                         delete config["updatetime"];
@@ -1066,10 +1043,10 @@ var CoreConfig = function () {
                 switch (res) {
                     case "invalid":
                     case "cannotparse":
-                        errorInfo = (0, _i18n3.default)("Saved configuration on server is invalid.");
+                        errorInfo = (0, _i18n2.default)("Saved configuration on server is invalid.");
                         break;
                     case "empty":
-                        errorInfo = (0, _i18n3.default)("Can not find any configuration for you on this wiki.");
+                        errorInfo = (0, _i18n2.default)("Can not find any configuration for you on this wiki.");
                         break;
                 }
                 _this6.notice.create.error(errorInfo);
@@ -1939,7 +1916,7 @@ var Version = exports.Version = function Version() {
   _classCallCheck(this, Version);
 };
 
-Version.VERSION = "0.0.8";
+Version.VERSION = "1.0.3";
 Version.releaseNote = "i18n生成器的更新。";
 Version.scriptURL = "https://localhost/Wikiplus-3.0"; //请不要以斜杠“/”结尾
 

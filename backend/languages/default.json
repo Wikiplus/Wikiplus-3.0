@@ -1,6 +1,6 @@
 {
     "language": "default",
-    "update_time": "2016-10-05 15:11:22",
+    "update_time": "2016-10-06 18:57:47",
     "defaultScope": {
 
 "Allow":
@@ -117,6 +117,9 @@
 "contenttoobig":
 "<Translate Here>",
 
+"create_page_tip":
+"<Translate Here>",
+
 "customcssprotected":
 "<Translate Here>",
 
@@ -144,6 +147,12 @@
 "invalidtitle":
 "<Translate Here>",
 
+"load_wikitext_failed":
+"<Translate Here>",
+
+"loading":
+"<Translate Here>",
+
 "loading_preview":
 "<Translate Here>",
 
@@ -154,6 +163,12 @@
 "<Translate Here>",
 
 "noedit":
+"<Translate Here>",
+
+"notoken":
+"<Translate Here>",
+
+"onclose_confirm":
 "<Translate Here>",
 
 "pagedeleted":

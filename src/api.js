@@ -189,6 +189,7 @@ export class API {
                             'pagedeleted': _('pagedeleted'),
                             'editconflict': _('editconflict'),
                             'badtoken': _('badtoken'),
+                            'notoken': _('notoken'),
                             'invalidtitle': _('invalidtitle'),
                             'summaryrequired': _('summaryrequired'),
                             'customcssprotected': _('customcssprotected'),

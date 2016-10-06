@@ -1,6 +1,6 @@
 {
     "language": "zh-cn",
-    "update_time": "2016-10-05 15:11:22",
+    "update_time": "2016-10-06 18:57:47",
     "defaultScope": {
 
 "Allow":
@@ -31,7 +31,7 @@
 "你允许Wikiplus收集一些非敏感的信息来帮助改善和为当前Wiki:$1提供支持吗？",
 
 "Edit submitted":
-"<Translate Here>",
+"编辑提交成功",
 
 "Find a uploaded configuration of $1. Do you want to import this config now?":
 "找到一个上传于$1的配置文件，是否立即导入？",
@@ -117,6 +117,9 @@
 "contenttoobig":
 "内容过长",
 
+"create_page_tip":
+"<!-- 您正在新建新页面，请删去本行后进行编辑。 -->",
+
 "customcssprotected":
 "不允许编辑用户CSS页面",
 
@@ -144,6 +147,12 @@
 "invalidtitle":
 "非法的标题",
 
+"load_wikitext_failed":
+"无法获取页面内容",
+
+"loading":
+"载入中",
+
 "loading_preview":
 "正在载入预览",
 
@@ -155,6 +164,12 @@
 
 "noedit":
 "无编辑权限",
+
+"notoken":
+"空编辑权标",
+
+"onclose_confirm":
+"[Wikiplus] 关闭此页面您将会失去您当前的编辑数据",
 
 "pagedeleted":
 "编辑时页面被删除",

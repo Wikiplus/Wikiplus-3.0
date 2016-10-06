@@ -278,7 +278,7 @@ export class Wikiplus {
                     // 关闭网页确认
                     $('#Wikiplus-Quickedit').keydown(function () {
                         window.onclose = window.onbeforeunload = function () {
-                            return `${i18n('onclose_confirm')}`;
+                            return `${_('onclose_confirm')}`;
                         }
                     });
 
@@ -303,7 +303,7 @@ export class Wikiplus {
                             outputArea.find('.Wikiplus-Banner').html(e);
                             outputArea.fadeIn(100);
                         });
-                        window.onclose = window.onbeforeunload = undefined; //取消页面关闭确认
+                        $('#Wikiplus-Quickedit-Submit,#Wikiplus-Quickedit,#Wikiplus-Quickedit-Preview-Submit').removeAttr('disabled');
                     })
                 })
             }
@@ -323,15 +323,13 @@ class CoreConfig {
     }
 
     init() {
-        if (API.getThisPageName().substr(5) == API.getUsername()) {
-            UI.addLinkInToolbox({
-                name: _("Wikiplus Config"),
-                title: _("Configurations for global Wikiplus."),
-                callback: () => {
-                    this.drawConfigBox();
-                }
-            })
-        }
+        UI.addLinkInToolbox({
+            name: _("Wikiplus Config"),
+            title: _("Configurations for global Wikiplus."),
+            callback: () => {
+                this.drawConfigBox();
+            }
+        })
     }
 
     drawConfigBox() {
@@ -418,7 +416,7 @@ class CoreConfig {
     }
 
     saveConfigToLocal(config) {
-        for (let confKey of config) {
+        for (let confKey in config) {
             if (CoreConfig.objectiveConfig[confKey]) {
                 Util.setLocalConfig(confKey, config[confKey], true);
             } else {
