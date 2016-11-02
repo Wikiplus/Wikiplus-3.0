@@ -116,21 +116,21 @@ module.exports = function (grunt) {
                     }
                     j++;
                 }
-                
+
                 //遇到无效字符，直接进入下一轮查找
                 if (!vaild) {
                     loopIndex = i + 1;
                     grunt.log.debug("Invaild p1");
                     continue;
                 }
-                
+
                 //查找第一参数
                 j++;
                 while (sourceContent[j] != stringBorder[0]) {
                     restr += sourceContent[j];
                     j++;
                 }
-                
+
                 //查找下一个分界符
                 j++;
                 var nextType = '';
@@ -182,14 +182,14 @@ module.exports = function (grunt) {
                         }
                         j++;
                     }
-                    
+
                     //遇到无效字符，continue
                     if (!vaild) {
                         grunt.log.debug("Invaild p2");
                         loopIndex = i + 1;
                         continue;
                     }
-                    
+
                     //查找第二参数
                     j++;
                     var scopeStr = "";
@@ -197,7 +197,7 @@ module.exports = function (grunt) {
                         scopeStr += sourceContent[j];
                         j++;
                     }
-                    
+
                     //查找函数结束
                     while (sourceContent[j] != ')') j++;
                     if (Scopes[scopeStr] == undefined) {
@@ -211,18 +211,19 @@ module.exports = function (grunt) {
                 }
                 loopIndex = i + 1;
             }
-        })
-        
+        });
+
         //整理文件
         grunt.log.ok("共找到 " + i18nCount + " 个i18n引用。");
         //排序去重
         defaultScope = arrayunique(defaultScope);
         var scopeCount = 0; //scope计数
-        for (var scope in Scopes) {
+        var scope;
+        for (scope in Scopes) {
             Scopes[scope] = arrayunique(Scopes[scope]);
             scopeCount++;
         }
-        
+
         //生成
         var languageDefaultContent = {};
         languageDefaultContent.language = "default";
@@ -231,14 +232,14 @@ module.exports = function (grunt) {
         for (var stri in defaultScope) {
             languageDefaultContent.defaultScope[defaultScope[stri]] = "<Translate Here>";
         }
-        for (var scope in Scopes) {
+        for (scope in Scopes) {
             var scopeTemp = {};
             for (var strj in Scopes[scope]) {
                 scopeTemp[Scopes[scope][strj]] = "<Translate Here>";
             }
             languageDefaultContent[scope + "Scope"] = scopeTemp;
         }
-        
+
         //格式化工厂
         function formatLanguageFile(languageContent) {
             var formattedContent = '{\n' +
@@ -249,16 +250,16 @@ module.exports = function (grunt) {
             var scopeCount = 0;
             for (var scopeName in languageContent) {
                 if (scopeName.substr(-5) == "Scope") {
-                    formattedContent += '    "' + scopeName + '": {\n\n';
+                    formattedContent += '    "' + scopeName + '": {\n';
                     var thisScope = languageContent[scopeName];
                     var thisScopeLength = objLength(thisScope);
                     var stri = 0;
                     for (var strKey in thisScope) {
-                        formattedContent += '"' + strKey + '":\n';
+                        formattedContent += '       "' + strKey + '":';
                         if (stri != thisScopeLength - 1) {
-                            formattedContent += '"' + thisScope[strKey] + '",\n\n';
+                            formattedContent += '"' + thisScope[strKey] + '",\n';
                         } else {
-                            formattedContent += '"' + thisScope[strKey] + '"\n\n';
+                            formattedContent += '"' + thisScope[strKey] + '"\n';
                         }
                         stri++;
                     }
@@ -299,9 +300,9 @@ module.exports = function (grunt) {
             grunt.file.write(abspath, formatLanguageFile(mergedContent));
             grunt.log.writeln("更新文件：" + languageContent.language + ".json");
         });
-        
+
         //强制更新default
         grunt.file.write("backend/languages/default.json", formatLanguageFile(languageDefaultContent));
         grunt.log.ok("Done.");
     });
-}
+};

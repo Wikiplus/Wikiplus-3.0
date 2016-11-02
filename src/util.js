@@ -9,7 +9,7 @@ export class Util {
             rel: "stylesheet",
             type: "text/css",
             href: path
-        })
+        });
         $("head").append(cssNode);
     }
 
@@ -20,7 +20,7 @@ export class Util {
             type: 'text/javascript',
             async: false,
             src: path
-        })
+        });
         $("head").append(jsnode);
     }
 

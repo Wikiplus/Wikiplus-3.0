@@ -39,13 +39,16 @@ export class Wikiplus {
 
     }
 
+    /**
+     * 检查安装
+     */
     checkInstall() {
         let self = this;
         let isInstall = this.coreConfig.isInstall;
         if (isInstall === "True") {
             //加载并初始化i18n
             let i18n = new I18n(this.coreConfig.language);
-            i18n.initi18n();
+            i18n.initI18n();
             //Updated Case
             if (this.coreConfig.Version !== Version.VERSION) {
                 this.notice.create.success("Wikiplus-3.0 v" + Version.VERSION);
@@ -57,7 +60,7 @@ export class Wikiplus {
         } else {
             //首次加载并初始化i18n（使用系统语言）
             let i18n = new I18n(window.navigator.language.toLowerCase(), false);
-            i18n.initi18n();
+            i18n.initI18n();
             //安装
             let install = function () {
                 self.coreConfig.isInstall = 'True';
@@ -310,10 +313,21 @@ export class Wikiplus {
         })
     }
 
+    /**
+     * 快速重定向
+     */
+    initQuickRedirect(){
 
+    }
+
+
+    /**
+     * 加载核心功能
+     */
     loadCoreFunctions() {
         this.coreConfig.init();
         this.initQuickEdit();
+        this.initQuickRedirect();
     }
 }
 
@@ -364,7 +378,7 @@ class CoreConfig {
         );
 
         //从服务器恢复设置
-        let loadConfigBtn = $(`<input type="button" id="wikiplus-config-btn-loadconfig" value="${_("Load Config") }">`)
+        let loadConfigBtn = $(`<input type="button" id="wikiplus-config-btn-loadconfig" value="${_("Load Config") }">`);
         loadConfigBtn.click(() => {
             this.notice.create.success(_("Checking if had configuration on this wiki."));
             this.loadConfig();

@@ -30,6 +30,12 @@ export class UI {
         })
     }
 
+    static addLinkInDropDownMenu(options){
+        var id = options.id || 'Wikiplus-' + (Math.random() + 1).toString(36).substring(4,8); // 如果没有给定ID，那么随机生成一个
+        var text = options.text || '';
+        
+    };
+
     /**
      * 建立对话框
      * @param {String} option.info 信息
@@ -85,8 +91,8 @@ export class UI {
     /**
      * 画框
      * @param {String} option.title 标题
-     * @param {HTML} option.content 内容
-     * @param {Integer} option.width = 600 宽度，单位为px
+     * @param {html} option.content 内容
+     * @param {int} option.width = 600 宽度，单位为px
      * @param {function()} option.callback 回调函数
      */
     static createBox(option) {

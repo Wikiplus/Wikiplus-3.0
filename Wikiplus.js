@@ -1,6 +1,6 @@
 /**
  * Wikiplus-3.0 v0.0.5
- * 2016-10-06
+ * 2016-11-01
  * 
  * Github:https://github.com/Wikiplus/Wikiplus-3.0
  *
@@ -636,7 +636,7 @@ var Wikiplus = exports.Wikiplus = function () {
             if (isInstall === "True") {
                 //加载并初始化i18n
                 var i18n = new _i18n.I18n(this.coreConfig.language);
-                i18n.initi18n();
+                i18n.initI18n();
                 //Updated Case
                 if (this.coreConfig.Version !== _version.Version.VERSION) {
                     this.notice.create.success("Wikiplus-3.0 v" + _version.Version.VERSION);
@@ -649,7 +649,7 @@ var Wikiplus = exports.Wikiplus = function () {
                 (function () {
                     //首次加载并初始化i18n（使用系统语言）
                     var i18n = new _i18n.I18n(window.navigator.language.toLowerCase(), false);
-                    i18n.initi18n();
+                    i18n.initI18n();
                     //安装
                     var install = function install() {
                         self.coreConfig.isInstall = 'True';
@@ -1199,8 +1199,8 @@ var I18n = exports.I18n = function () {
     }
 
     _createClass(I18n, [{
-        key: 'initi18n',
-        value: function initi18n() {
+        key: 'initI18n',
+        value: function initI18n() {
             var i18nCache = _util.Util.getLocalConfig("i18nCache", true);
             if (i18nCache === undefined) {
                 this.load();
@@ -1225,7 +1225,7 @@ var I18n = exports.I18n = function () {
                 success: function success(data) {
                     if (data.language == _this.lang) {
                         _util.Util.setLocalConfig("i18nCache", data, true);
-                        _this.initi18n();
+                        _this.initI18n();
                     } else {
                         console.warn("i18n: 似乎是载入了错误的语言文件。");
                     }
@@ -1235,7 +1235,7 @@ var I18n = exports.I18n = function () {
                 }
             };
             if (!this.async) {
-                ajaxConfig.async = false;
+                ajaxConfig.async = false; // TODO: 同步AJAX将导致浏览器卡顿
             }
 
             $.ajax(ajaxConfig);
@@ -1918,6 +1918,6 @@ var Version = exports.Version = function Version() {
 
 Version.VERSION = "1.0.3";
 Version.releaseNote = "i18n生成器的更新。";
-Version.scriptURL = "https://localhost/Wikiplus-3.0"; //请不要以斜杠“/”结尾
+Version.scriptURL = "http://localhost/Wikiplus-3.0"; //请不要以斜杠“/”结尾
 
 },{}]},{},[6]);

@@ -30,7 +30,7 @@ export class I18n {
         this.async = async;
     }
 
-    initi18n() {
+    initI18n() {
         let i18nCache = Util.getLocalConfig("i18nCache", true);
         if (i18nCache === undefined) {
             this.load();
@@ -52,7 +52,7 @@ export class I18n {
             success: data=> {
                 if (data.language == this.lang) {
                     Util.setLocalConfig("i18nCache", data, true);
-                    this.initi18n();
+                    this.initI18n();
                 } else {
                     console.warn("i18n: 似乎是载入了错误的语言文件。");
                 }
@@ -62,7 +62,7 @@ export class I18n {
             }
         };
         if (!this.async) {
-            ajaxConfig.async = false;
+            ajaxConfig.async = false; // TODO: 同步AJAX将导致浏览器卡顿
         }
 
         $.ajax(ajaxConfig);
